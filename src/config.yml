@@ -1,0 +1,28 @@
+#This plugin was developed by Gianmattia
+#All rights are reserved by him
+#Do not sell or gift this plugin without dev's permission
+
+#Default config
+message-join: "&8|| &bGra&avity&7: Welcome to our minigame!"
+max-players: 10
+min-players: 2
+maps-per-game: 5
+lobbyspawn:
+  spawnpoint:
+    world: 0
+    x: 0
+    y: 0
+    z: 0
+    yaw: 0
+    pitch: 0
+
+maps:
+  '1':
+    name: "Example"
+    spawnpoint:
+      world: world
+      x: 0
+      y: 0
+      z: 0
+      yaw: 0
+      pitch: 0

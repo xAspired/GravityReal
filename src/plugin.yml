@@ -1,0 +1,22 @@
+name: GravityReal # the plugins name as it should appear in the plugin list /pl
+version: 1.69 # the plugin's version
+author: Gianmattia
+main: me.gianmattia.GravityReal.Main
+api-version: 1.17 # the version of the API you want to use, required starting with 1.13
+# List of commands.
+commands:
+  gravity:
+    description: Shows a list of possible command to do while admin
+    usage: /<command>
+    permission: gravityreal.admin
+    permission-message: "You can't execute that command"
+  setspawnlobby:
+    description: Allows you to set your Spawn Lobby
+    usage: /<command>
+    permission: gravityreal.admin
+    permission-message: "You can't execute that command"
+  spawn:
+    description: Teleport player to Lobby Spawnpoint
+    usage: /<command>
+    permission: gravityreal.spawn
+    permission-message: "You can't execute that command"
