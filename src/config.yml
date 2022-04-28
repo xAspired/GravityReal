@@ -2,11 +2,11 @@
 #All rights are reserved by him
 #Do not sell or gift this plugin without dev's permission
 
-#Default config
-message-join: "&8|| &bGra&avity&7: Welcome to our minigame!"
+#Default Configuration File
+message-join: "&8|| &bGra&avity&7: Welcome to our minigame!" #Join Chat Message
 max-players: 10
 min-players: 2
-maps-per-game: 5
+maps-per-game: 5 #Number of Maps for each game
 lobbyspawn:
   spawnpoint:
     world: 0
@@ -17,12 +17,3 @@ lobbyspawn:
     pitch: 0
 
 maps:
-  '1':
-    name: "Example"
-    spawnpoint:
-      world: world
-      x: 0
-      y: 0
-      z: 0
-      yaw: 0
-      pitch: 0

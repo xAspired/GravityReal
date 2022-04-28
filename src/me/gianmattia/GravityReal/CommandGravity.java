@@ -34,14 +34,14 @@ public class CommandGravity implements CommandExecutor {
 
             if(command.getName().equalsIgnoreCase("setspawnlobby")) {
 
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.world", Objects.requireNonNull(player.getLocation().getWorld()).getName());
+                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.world", player.getLocation().getWorld().getName());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.x", player.getLocation().getX());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.y", player.getLocation().getY());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.z", player.getLocation().getZ());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
                 Main.getInstance().saveDefaultConfig();
-                player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Lobby Spawnpoint Set!");
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Lobby Spawnpoint Set!");
                 return true;
             }
 
@@ -53,12 +53,12 @@ public class CommandGravity implements CommandExecutor {
 
                 //If the spawn is not set
                 if(Objects.equals(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"), "0")) {
-                    player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Spawn is not set!");
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Spawn is not set!");
                 }
                 else {
 
                     //Create a new virtual object named world, that names is the same as the one in the config
-                    World Lobby = Bukkit.getServer().getWorld(Objects.requireNonNull(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world")));
+                    World Lobby = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"));
 
                     //Coords taken from the conf.yml file
                     double x = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.x");
@@ -93,19 +93,31 @@ public class CommandGravity implements CommandExecutor {
         }
 
         /* **********************************************
-                     /gravity createmap - Command
+                     /gravity createmap <map> - Command
         ********************************************** */
         else if (args[0].equalsIgnoreCase("createmap")) {
+            String nameMap;
+            int numberMaps;
 
-            if(args[1].isEmpty()) {
-                player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": You must declare a name for your new map!");
+            //Check that player have wrote the name of the map
+            try {
+                nameMap = args[1];
+            }
+            catch (Exception e) {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": You must declare a name for your new map!");
                 return true;
             }
-
-            String nameMap = args[1];
             boolean isFor = false;
 
-            int numberMaps = Objects.requireNonNull(Main.getInstance().config.getConfigurationSection("maps")).getKeys(false).size();
+            //Check if there are maps in the config
+            try {
+                numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
+            }
+            catch (Exception e) {
+                numberMaps = 0;
+            }
+
+            System.out.println("Number of already created Maps: " + numberMaps);
 
             int numberMap = 0;
             for(int i = 1; i <= numberMaps; i++) {
@@ -117,19 +129,22 @@ public class CommandGravity implements CommandExecutor {
                  */
 
                 //If the name of the map already exists
-                if(Objects.requireNonNull(Main.getInstance().getConfig().getString("maps." + i + ".name")).equalsIgnoreCase(nameMap)) {
+                try {
+                    if (Main.getInstance().getConfig().getString("maps." + i + ".name").equalsIgnoreCase(nameMap)) {
 
-                    //Set isFor to true if the name of the map already exists
-                    isFor = true;
-                }
+                        //Set isFor to true if the name of the map already exists
+                        isFor = true;
+                    }
+                } catch (Exception e) {}
                 numberMap = i;
             }
 
+
             if(!isFor) {
-                sender.sendMessage("The name of the map isn't already taken: " + nameMap);
+                System.out.println("The name of the map isn't already taken: " + nameMap);
                 numberMap++;
 
-                //Adding blank values under the name of the map. Then, when someone type /setspawn <map> the values are overwritten
+                //Adding blank values under the name of the map. Then, when someone type /gravity setmapspawn <map> the values are overwritten
                 //I need to add a number first, that's the header of the map (e.g. 3)
 
 
@@ -140,28 +155,71 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().getConfig().set("maps." + numberMap + ".spawnpoint.z", 0);
                 Main.getInstance().getConfig().set("maps." + numberMap + ".spawnpoint.pitch", 0);
                 Main.getInstance().getConfig().set("maps." + numberMap + ".spawnpoint.yaw", 0);
-                Main.getInstance().saveDefaultConfig();
-                player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY +  " created!");
+                Main.getInstance().saveConfig();
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY +  " created!");
 
             }
             else {
-                player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": The map already exists!");
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": The map already exists!");
             }
 
             return true;
         }
 
         /* **********************************************
-                     /gravty reload Command
+                  /gravity setmapspawn <map> - Command
+        ********************************************** */
+        else if (args[0].equalsIgnoreCase("setmapspawn")) {
+            String nameMap;
+
+            try {
+                nameMap = args[1];
+            }
+            catch (Exception e) {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": You must declare a name of a map!");
+                return true;
+            }
+            boolean isFor = false;
+
+            int numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
+
+            for(int i = 1; i <= numberMaps; i++) {
+
+                //If the name of the map already exists
+                if(Main.getInstance().getConfig().getString("maps." + i + ".name").equalsIgnoreCase(nameMap)) {
+
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.world", player.getLocation().getWorld().getName());
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.x", player.getLocation().getX());
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.y", player.getLocation().getY());
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.z", player.getLocation().getZ());
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.pitch", player.getLocation().getPitch());
+                    Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.yaw", player.getLocation().getYaw());
+                    Main.getInstance().saveConfig();
+
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+
+                    //Set isFor to true if the name of the map already exists
+                    isFor = true;
+                }
+            }
+
+            if(!isFor)
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+
+            return true;
+        }
+
+        /* **********************************************
+                     /gravity reload Command
         ********************************************** */
 
         else if(args[0].equalsIgnoreCase("reload")) {
             Main.getInstance().reloadConfig();
-            player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Config reloaded!");
+            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Config reloaded!");
             return true;
         }
 
-        player.sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Incorrect Syntax! Type /gravity for help");
+        player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Incorrect Syntax! Type /gravity for help");
         return true;
     }
 }

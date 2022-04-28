@@ -29,10 +29,9 @@ public class Main extends JavaPlugin implements Listener {
 
 
         //New command
-        Objects.requireNonNull(getCommand("gravity")).setExecutor(new CommandGravity());
-        Objects.requireNonNull(getCommand("setspawnlobby")).setExecutor(new CommandGravity());
-        Objects.requireNonNull(getCommand("spawn")).setExecutor(new CommandGravity());
-        Objects.requireNonNull(getCommand("createmap")).setExecutor(new CommandGravity());
+        getCommand("gravity").setExecutor(new CommandGravity());
+        getCommand("setspawnlobby").setExecutor(new CommandGravity());
+        getCommand("spawn").setExecutor(new CommandGravity());
 
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);
@@ -73,7 +72,7 @@ public class Main extends JavaPlugin implements Listener {
         if(!(Objects.equals(getConfig().get("lobbyspawn.spawnpoint.world"), 0))) {
 
             //Create a new virtual object named world, that names is the same as the one in the config
-            World Lobby = Bukkit.getServer().getWorld(Objects.requireNonNull(getConfig().getString("lobbyspawn.spawnpoint.world")));
+            World Lobby = Bukkit.getServer().getWorld(getConfig().getString("lobbyspawn.spawnpoint.world"));
 
             //Coords taken from the conf.yml file
             double x = getConfig().getDouble("lobbyspawn.spawnpoint.x");
@@ -85,7 +84,7 @@ public class Main extends JavaPlugin implements Listener {
         }
 
         //Send the custom message write in the config in "message-join"
-        event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(getConfig().getString("message-join"))));
+        event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("message-join")));
         event.getPlayer().sendTitle("§fWelcome to §bGra§avity", "§fYou are now in §e§nqueue", 10, 80, 10);
 
         //Send the join message
