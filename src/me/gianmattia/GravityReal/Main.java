@@ -32,6 +32,7 @@ public class Main extends JavaPlugin implements Listener {
         getCommand("gravity").setExecutor(new CommandGravity());
         getCommand("setspawnlobby").setExecutor(new CommandGravity());
         getCommand("spawn").setExecutor(new CommandGravity());
+        getCommand("debug").setExecutor(new CommandGravity());
 
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);

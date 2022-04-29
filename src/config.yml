@@ -1,6 +1,12 @@
-# This plugin was developed by Gianmattia
-# All rights are reserved by him
-# Do not sell or gift this plugin without dev's permission
+# +----------------------------------------------------+
+# <              GravityReal by Gianmattia             >
+# <                                                    >
+# <           All rights are reserved by him           >
+# <    Do not sell or gift without dev's permission    >
+# +----------------------------------------------------+
+#
+# !!These comments will be erased on the first creation of a Map!!
+#
 
 # Default Configuration File
 message-join: "&8|| &bGra&avity&7: Welcome to our minigame!" # Join Chat Message

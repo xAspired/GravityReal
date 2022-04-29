@@ -20,3 +20,8 @@ commands:
     usage: /<command>
     permission: gravityreal.spawn
     permission-message: "You can't execute that command"
+  debug:
+    description: Lets Dev debugging on his code
+    usage: /<command>
+    permission: gravityreal.admin
+    permission-message: "You can't execute that command"
