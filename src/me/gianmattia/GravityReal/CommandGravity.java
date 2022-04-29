@@ -40,7 +40,7 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.z", player.getLocation().getZ());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
                 Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
-                Main.getInstance().saveDefaultConfig();
+                Main.getInstance().saveConfig();
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Lobby Spawnpoint Set!");
                 return true;
             }
@@ -156,6 +156,8 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().getConfig().set("maps." + numberMap + ".spawnpoint.pitch", 0);
                 Main.getInstance().getConfig().set("maps." + numberMap + ".spawnpoint.yaw", 0);
                 Main.getInstance().saveConfig();
+
+
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY +  " created!");
 
             }
@@ -195,6 +197,7 @@ public class CommandGravity implements CommandExecutor {
                     Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.pitch", player.getLocation().getPitch());
                     Main.getInstance().getConfig().set("maps." + i + ".spawnpoint.yaw", player.getLocation().getYaw());
                     Main.getInstance().saveConfig();
+
 
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + ": Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 

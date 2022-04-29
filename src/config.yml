@@ -1,12 +1,12 @@
-#This plugin was developed by Gianmattia
-#All rights are reserved by him
-#Do not sell or gift this plugin without dev's permission
+# This plugin was developed by Gianmattia
+# All rights are reserved by him
+# Do not sell or gift this plugin without dev's permission
 
-#Default Configuration File
-message-join: "&8|| &bGra&avity&7: Welcome to our minigame!" #Join Chat Message
+# Default Configuration File
+message-join: "&8|| &bGra&avity&7: Welcome to our minigame!" # Join Chat Message
 max-players: 10
 min-players: 2
-maps-per-game: 5 #Number of Maps for each game
+maps-per-game: 5 # Number of Maps for each game
 lobbyspawn:
   spawnpoint:
     world: 0
