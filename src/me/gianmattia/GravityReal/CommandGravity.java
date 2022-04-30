@@ -30,27 +30,10 @@ public class CommandGravity implements CommandExecutor {
         if (args.length == 0) {
 
             /* **********************************************
-                SetSpawnLobby Command (for the Lobby tho)
-             ********************************************** */
-
-            if(command.getName().equalsIgnoreCase("setspawnlobby")) {
-
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.world", player.getLocation().getWorld().getName());
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.x", player.getLocation().getX());
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.y", player.getLocation().getY());
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.z", player.getLocation().getZ());
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
-                Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
-                Main.getInstance().saveConfig();
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Lobby Spawnpoint Set!");
-                return true;
-            }
-
-            /* **********************************************
                         Spawn Command (for the Lobby)
              ********************************************** */
 
-            else if(command.getName().equalsIgnoreCase("spawn")) {
+            if(command.getName().equalsIgnoreCase("spawn")) {
 
                 //If the spawn is not set
                 if(Objects.equals(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"), "0")) {
@@ -98,7 +81,7 @@ public class CommandGravity implements CommandExecutor {
                 player.sendMessage(ChatColor.GRAY + "        Here are a list of command you can type");
                 player.sendMessage(" ");
                 player.sendMessage(ChatColor.AQUA + " /gravity reload" + ChatColor.GRAY + " - Reloads the plugin");
-                player.sendMessage(ChatColor.AQUA + " /setspawnlobby" + ChatColor.GRAY + " - Sets the spawn of the Lobby");
+                player.sendMessage(ChatColor.AQUA + " /gravity setspawnlobby" + ChatColor.GRAY + " - Sets the spawn of the Lobby");
                 player.sendMessage(ChatColor.AQUA + " /spawn" + ChatColor.GRAY + " - Teleports yourself to spawnpoint");
                 player.sendMessage(ChatColor.AQUA + " /gravity createmap <name>" + ChatColor.GRAY + " - Lets you create a new Map");
                 player.sendMessage(ChatColor.AQUA + " /gravity setmapspawn <map>" + ChatColor.GRAY + " - Lets you set the map spawnpoint");
@@ -206,7 +189,7 @@ public class CommandGravity implements CommandExecutor {
 
         else if(args[0].equalsIgnoreCase("reload")) {
             Main.getInstance().reloadConfig();
-            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Config reloaded!");
+            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
             return true;
         }
 
@@ -270,6 +253,23 @@ public class CommandGravity implements CommandExecutor {
             if(!isFor)
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist!");
 
+            return true;
+        }
+
+        /* **********************************************
+                SetSpawnLobby Command (for the Lobby tho)
+        ********************************************** */
+
+        else if(args[0].equalsIgnoreCase("setspawnlobby")) {
+
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.world", player.getLocation().getWorld().getName());
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.x", player.getLocation().getX());
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.y", player.getLocation().getY());
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.z", player.getLocation().getZ());
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
+            Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
+            Main.getInstance().saveConfig();
+            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Lobby Spawnpoint Set!");
             return true;
         }
 

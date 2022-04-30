@@ -10,11 +10,6 @@ commands:
     usage: /<command>
     permission: gravityreal.admin
     permission-message: "You can't execute that command"
-  setspawnlobby:
-    description: Allows you to set your Spawn Lobby
-    usage: /<command>
-    permission: gravityreal.admin
-    permission-message: "You can't execute that command"
   spawn:
     description: Teleport player to Lobby Spawnpoint
     usage: /<command>

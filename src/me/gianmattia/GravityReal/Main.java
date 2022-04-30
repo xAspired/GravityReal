@@ -30,7 +30,6 @@ public class Main extends JavaPlugin implements Listener {
 
         //New command
         getCommand("gravity").setExecutor(new CommandGravity());
-        getCommand("setspawnlobby").setExecutor(new CommandGravity());
         getCommand("spawn").setExecutor(new CommandGravity());
         getCommand("debug").setExecutor(new CommandGravity());
 
