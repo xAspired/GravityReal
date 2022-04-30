@@ -115,7 +115,6 @@ public class CommandGravity implements CommandExecutor {
         ********************************************** */
         else if (args[0].equalsIgnoreCase("createmap")) {
             String nameMap;
-            int numberMaps;
 
             //Check that player have wrote the name of the map
             try {
@@ -126,16 +125,6 @@ public class CommandGravity implements CommandExecutor {
                 return true;
             }
             boolean isFor = false;
-
-            //Check if there are maps in the config
-            try {
-                numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
-            }
-            catch (Exception e) {
-                numberMaps = 0;
-            }
-
-            System.out.println("Number of already created Maps: " + numberMaps);
 
 
             //If the name of the map already exists
@@ -149,8 +138,6 @@ public class CommandGravity implements CommandExecutor {
 
 
             if(!isFor) {
-                System.out.println("The name of the map isn't already taken: " + nameMap);
-
                 //Adding blank values under the name of the map. Then, when someone type /gravity setmapspawn <map> the values are overwritten
                 //I need to add a number first, that's the header of the map (e.g. 3)
 
@@ -234,11 +221,16 @@ public class CommandGravity implements CommandExecutor {
             //Check if there are maps in the config
             try {
                 numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Here is the list of maps");
-                player.sendMessage(ChatColor.DARK_GRAY + "|| ");
             }
             catch (Exception e) {
                 numberMaps = 0;
+            }
+
+            if(numberMaps == 0)
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "There is no map set yet");
+            else {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Here is the list of maps:");
+                player.sendMessage(ChatColor.DARK_GRAY + "|| ");
             }
 
             for(int i = 0; i<numberMaps; i++) {
@@ -247,6 +239,41 @@ public class CommandGravity implements CommandExecutor {
 
             return true;
         }
+
+        /* **********************************************
+                 /gravity deletemap <map> Command
+        ********************************************** */
+        else if(args[0].equalsIgnoreCase("deletemap")) {
+            String nameMap;
+
+            try {
+                nameMap = args[1];
+            }
+            catch (Exception e) {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
+                return true;
+            }
+            boolean isFor = false;
+
+            //If the name of the map already exists
+            if(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+
+                Main.getInstance().getConfig().set("maps." + nameMap, null);
+                Main.getInstance().saveConfig();
+
+
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted!");
+
+                //Set isFor to true if the name of the map already exists
+                isFor = true;
+            }
+
+            if(!isFor)
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist!");
+
+            return true;
+        }
+
 
         player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Incorrect Syntax! Type /gravity for help");
         return true;

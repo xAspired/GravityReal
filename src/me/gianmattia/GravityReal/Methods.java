@@ -1,9 +1,9 @@
 package me.gianmattia.GravityReal;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -21,7 +21,7 @@ public class Methods {
                         Random Map Generation
              ********************************************** */
 
-            //Number of maps that players will play in a Game (can be set in the config)
+            //Number of maps players will play in a Game (can be set in the config)
             int [] gameMaps = new int[Main.getInstance().config.getInt("maps-per-game")];
 
             //Number of Maps in the config
@@ -36,8 +36,7 @@ public class Methods {
                     tempNumberList.add(i);
                 }
                 for (int count = 0; count < gameMaps.length; count++) {
-                    gameMaps[count] = tempNumberList.remove((int) (Math.random() * tempNumberList.size() + 1));
-                    //System.out.println("gameMaps: " + gameMaps[count]);
+                    gameMaps[count] = tempNumberList.remove((int) (Math.random() * tempNumberList.size()));
                 }
             }
             catch (Exception e) {
@@ -49,6 +48,8 @@ public class Methods {
             //Broadcasting that the minPlayers is satisfied
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Minimum number of players reached!");
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY +  "...");
+
+
             /* **********************************************
                             10 Seconds' Countdown
              ********************************************** */
