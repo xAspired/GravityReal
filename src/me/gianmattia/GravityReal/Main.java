@@ -96,6 +96,7 @@ public class Main extends JavaPlugin implements Listener {
 
     }
 
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
