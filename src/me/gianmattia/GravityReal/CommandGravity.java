@@ -125,6 +125,7 @@ public class CommandGravity implements CommandExecutor {
 
 
                 Main.getInstance().getConfig().set("maps." + nameMap, nameMap);
+                Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", 0);
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.world", 0);
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.x", 0);
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.y", 0);
@@ -169,6 +170,9 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.pitch", player.getLocation().getPitch());
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.yaw", player.getLocation().getYaw());
                 Main.getInstance().saveConfig();
+                player.getLocation().getWorld().setGameRuleValue("doImmediateRespawn", "true");
+
+
 
 
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");

@@ -1,13 +1,11 @@
 package me.gianmattia.GravityReal;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -100,6 +98,14 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
+        if(Bukkit.getOnlinePlayers().size() == 0)
+            Methods.isGameStarted = false;
     }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        event.setDeathMessage(null);
+    }
+
 }
 

@@ -1,21 +1,22 @@
 package me.gianmattia.GravityReal;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.bukkit.Bukkit.getServer;
+import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
 
 public class Methods {
-    static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    static boolean isGameStarted = false;
+    static public boolean isGameStarted = false;
 
     public static void startGame() {
         if(!isGameStarted) {
@@ -29,6 +30,7 @@ public class Methods {
 
             //Number of maps players will play in a Game (can be set in the config)
             String [] nameMaps = new String[Main.getInstance().config.getInt("maps-per-game")];
+            StringBuilder nameMapsConcatenated = new StringBuilder();
 
             //Check if the value of numberMaps is null (there aren't maps set in the config)
             try {
@@ -50,6 +52,9 @@ public class Methods {
                 for (int count = 0; count < nameMaps.length; count++) {
                     nameMaps[count] = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
                     System.out.println("nameMaps[" + count + "]: " + nameMaps[count]);
+                    nameMapsConcatenated.append(nameMaps[count]);
+                    if(count < nameMaps.length - 1)
+                        nameMapsConcatenated.append(" - ");
                 }
             }
             else {
@@ -61,6 +66,20 @@ public class Methods {
             //Broadcasting that the minPlayers is satisfied
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Minimum number of players reached!");
 
+            //Sending to all players an actionbar that says which maps will be played
+            for (Player player : getServer().getOnlinePlayers()) {
+                new BukkitRunnable() {
+                    int countdownStarter = 2;
+                    public void run() {
+                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.valueOf(nameMapsConcatenated)));
+
+                        if (--countdownStarter < 0) {
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(Main.getInstance(), 20, 20);
+            }
+
             /* **********************************************
                    Create the Object fot the First Map
              ********************************************** */
@@ -69,7 +88,7 @@ public class Methods {
             //If some spanwpoints are not set:
             try {
                 //Create a new virtual world
-                firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + nameMaps[0] + "spawnpoint.world"));
+                firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + nameMaps[0] + ".spawnpoint.world"));
                 System.out.println(firstMap);
             }
             catch (Exception e) {
@@ -91,23 +110,29 @@ public class Methods {
              ********************************************** */
 
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY +  "...");
-            final Runnable runnable = new Runnable() {
+
+            new BukkitRunnable() {
                 int countdownStarter = 10;
                 public void run() {
-
                     Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + countdownStarter);
-                    countdownStarter--;
 
-                    if (countdownStarter < 0) {
-                        scheduler.shutdown();
+                    if (--countdownStarter < 0) {
+                        //Teleport all players to the first map spawn
+                        for (Player player : getServer().getOnlinePlayers()) {
+                            teleportAll(player, firstMap, x, y, z, (float) yaw, (float) pitch);
+                            player.setMaxHealth(2);
+                            player.setHealthScale(2);
+                        }
+                        cancel();
                     }
                 }
-            };
-            scheduler.scheduleAtFixedRate(runnable, 0, 1, SECONDS);
+            }.runTaskTimer(Main.getInstance(), 20, 20);
 
-            //Teleport all players to the first map spawn
-            for (Player player : Bukkit.getServer().getOnlinePlayers())
-                player.teleport(new Location(firstMap, x, y, z, (float) yaw, (float) pitch));
         }
     }
+    public static void teleportAll(Player player, World map, double x, double y, double z, float yaw, float pitch) {
+        player.teleport(new Location(map, x, y, z, yaw, pitch));
+    }
+
+
 }
