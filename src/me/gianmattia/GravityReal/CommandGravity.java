@@ -63,7 +63,6 @@ public class CommandGravity implements CommandExecutor {
             else if(command.getName().equalsIgnoreCase("debug")) {
                 System.out.println("GetKeys False: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false));
                 System.out.println("toArray[2]: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[1]);
-                //ArrayList<String> existingMaps =
                 System.out.println("ArraysToString toArray: " + Arrays.toString(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()));
                 System.out.println("Contains GreenHill: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains("Ciaone")); //Output: true/false
                 return true;
@@ -85,6 +84,7 @@ public class CommandGravity implements CommandExecutor {
                 player.sendMessage(ChatColor.AQUA + " /spawn" + ChatColor.GRAY + " - Teleports yourself to spawnpoint");
                 player.sendMessage(ChatColor.AQUA + " /gravity createmap <name>" + ChatColor.GRAY + " - Lets you create a new Map");
                 player.sendMessage(ChatColor.AQUA + " /gravity setmapspawn <map>" + ChatColor.GRAY + " - Lets you set the map spawnpoint");
+                player.sendMessage(ChatColor.AQUA + " /gravity setmapdiff <map> <diff>" + ChatColor.GRAY + " - Sets the map difficulty");
                 player.sendMessage(ChatColor.AQUA + " /gravity deletemap <name>" + ChatColor.GRAY + " - Remove an existent map");
                 player.sendMessage(ChatColor.AQUA + " /gravity listmaps" + ChatColor.GRAY + " - Shows a list of maps");
                 player.sendMessage(ChatColor.GRAY + "|--------------------------------------------|");
@@ -176,6 +176,61 @@ public class CommandGravity implements CommandExecutor {
 
 
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+
+                //Set isFor to true if the name of the map already exists
+                isFor = true;
+            }
+
+            if(!isFor)
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+
+            return true;
+        }
+
+        /* **********************************************
+                  /gravity setmapdiff <map> - Command
+        ********************************************** */
+        else if (args[0].equalsIgnoreCase("setmapdiff")) {
+            String nameMap;
+            String diffMap;
+
+
+            try {
+                nameMap = args[1];
+            }
+            catch (Exception e) {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
+                return true;
+            }
+
+            //Check player inserted the right difficulty
+            try {
+                diffMap = args[2];
+                if(!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard"))){
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                    return true;
+                }
+            }
+            catch (Exception e) {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                return true;
+            }
+
+
+            boolean isFor = false;
+
+            //If the name of the map already exists
+            if(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+
+                Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", diffMap);
+                Main.getInstance().saveConfig();
+
+                if(diffMap.equalsIgnoreCase("easy"))
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.GREEN + "Easy" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                else if(diffMap.equalsIgnoreCase("medium"))
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.YELLOW + "Medium" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                else
+                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.RED + "Hard" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 
                 //Set isFor to true if the name of the map already exists
                 isFor = true;

@@ -52,9 +52,24 @@ public class Methods {
                 for (int count = 0; count < nameMaps.length; count++) {
                     nameMaps[count] = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
                     System.out.println("nameMaps[" + count + "]: " + nameMaps[count]);
-                    nameMapsConcatenated.append(nameMaps[count]);
+
+                    //Different Color for Different Difficulty
+                    //Try and catch for those who wrongly remove manually the "difficulty" string from config file
+                    try {
+                        if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("easy"))
+                            nameMapsConcatenated.append(ChatColor.GREEN + nameMaps[count]);
+                        else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("medium"))
+                            nameMapsConcatenated.append(ChatColor.YELLOW + nameMaps[count]);
+                        else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("hard"))
+                            nameMapsConcatenated.append(ChatColor.RED + nameMaps[count]);
+                    }
+                    catch (Exception e) {
+                        nameMapsConcatenated.append(ChatColor.WHITE + nameMaps[count]);
+                    }
+
+                    //Settings to don't add the minus at the end of the StringBuilder
                     if(count < nameMaps.length - 1)
-                        nameMapsConcatenated.append(" - ");
+                        nameMapsConcatenated.append(ChatColor.WHITE + " - ");
                 }
             }
             else {
@@ -120,8 +135,8 @@ public class Methods {
                         //Teleport all players to the first map spawn
                         for (Player player : getServer().getOnlinePlayers()) {
                             teleportAll(player, firstMap, x, y, z, (float) yaw, (float) pitch);
-                            player.setMaxHealth(2);
-                            player.setHealthScale(2);
+                            player.setMaxHealth(6);
+                            player.setHealthScale(6);
                         }
                         cancel();
                     }
