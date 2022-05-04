@@ -11,10 +11,10 @@ This is my First JavaPlugin, so please don't kill me if some syntax still isn't 
 
 ## Upgrading
 
-1. Read the release notes carefully, but you may have to delete the old config.yml to use a new one.
+!! Read the release notes carefully, but you may have to delete the old config.yml to use a new one.
 
 ## Permissions
-Permissions are given automatically to players as listed below for BSkyBlock, AcidIsland and CaveBlock. If your permissions plugin strips permissions then you may have to allocate these manually. Note that if a player doesn't have the `intopten` permission, they will not be listed in the top ten.
+If your permissions plugin strips permissions then you may have to allocate these manually.
 
 ```
 permissions:    
