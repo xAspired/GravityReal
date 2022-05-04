@@ -20,3 +20,13 @@ commands:
     usage: /<command>
     permission: gravityreal.admin
     permission-message: "You can't execute that command"
+  coords:
+    description: Shows player's coordinates
+    usage: /<command>
+    permission: gravityreal.coords
+    permission-message: "You can't execute that command"
+  gmc:
+    description: Sets player's gamemode to creative
+    usage: /<command>
+    permission: gravityreal.gamemode.creative
+    permission-message: "You can't execute that command"
