@@ -13,18 +13,17 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
+@SuppressWarnings("ConstantConditions")
 public class CommandGravity implements CommandExecutor {
 
-
+    @SuppressWarnings( "deprecation" )
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         //If the command is sent by console e.g.
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("This command is runnable only by players");
             return true;
         }
-
-        Player player = (Player) sender;
 
         //If the command doesn't have any arguments (is one and stop e.g /gravity, /setspawnlobby)
         if (args.length == 0) {

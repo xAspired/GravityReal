@@ -7,14 +7,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
 import java.util.Objects;
 
+@SuppressWarnings("ConstantConditions")
 public class Main extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
     public static Main mainInstance;
+    public HashMap<Player, Integer> maps = new HashMap<>();
 
 
     @Override
@@ -26,10 +31,14 @@ public class Main extends JavaPlugin implements Listener {
         saveDefaultConfig();
 
 
-        //New command
+        //New command - Gravity
         getCommand("gravity").setExecutor(new CommandGravity());
         getCommand("spawn").setExecutor(new CommandGravity());
         getCommand("debug").setExecutor(new CommandGravity());
+
+        //New command - Utility
+        getCommand("coords").setExecutor(new CommandUtility());
+        getCommand("gmc").setExecutor(new CommandUtility());
 
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);
@@ -86,7 +95,7 @@ public class Main extends JavaPlugin implements Listener {
         event.getPlayer().sendTitle("§fWelcome to §bGra§avity", "§fYou are now in §e§nqueue", 10, 80, 10);
 
         //Send the join message
-        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
+        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players are the ones inserted in the config
         if(Bukkit.getOnlinePlayers().size() == minPlayers)
@@ -98,13 +107,73 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
-        if(Bukkit.getOnlinePlayers().size() == 0)
+
+        //If there is no one on the Server, Game will stop
+        if(Bukkit.getOnlinePlayers().size() == 1)
             Methods.isGameStarted = false;
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         event.setDeathMessage(null);
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if(Methods.isGameStarted) {
+            if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL) {
+                event.setCancelled(true);
+
+                //It verify that player's world is same as the one generated in Methods.nameMaps array
+                //If yes, then teleport player to the next map (i+1)
+                for(int i = 0; i<Methods.nameMaps.length-1; i++) {
+                    if(event.getPlayer().getWorld().getName().equalsIgnoreCase(Methods.nameMaps[i])) {
+                        World map = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + Methods.nameMaps[i+1] + ".spawnpoint.world"));
+                        double x = Main.getInstance().getConfig().getDouble("maps." + Methods.nameMaps[i+1] + ".spawnpoint.x");
+                        double y = Main.getInstance().getConfig().getDouble("maps." + Methods.nameMaps[i+1] + ".spawnpoint.y");
+                        double z = Main.getInstance().getConfig().getDouble("maps." + Methods.nameMaps[i+1] + ".spawnpoint.z");
+                        double yaw = Main.getInstance().getConfig().getDouble("maps." + Methods.nameMaps[i+1] + ".spawnpoint.yaw");
+                        double pitch = Main.getInstance().getConfig().getDouble("maps." + Methods.nameMaps[i+1] + ".spawnpoint.pitch");
+                        System.out.println("nextX: " + x + ", nextY: " + y + ", nextZ: " + z + ", nextWorld: " + map);
+                        Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
+
+                        //Ten Ticks delay that allows right teleport
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
+                            }
+                        }.runTaskLater(this, 10L);
+
+                        break;
+                    }
+
+                    //If the player is on the last map
+                    if (event.getPlayer().getWorld().getName().equalsIgnoreCase(Methods.nameMaps[Methods.nameMaps.length-1])) {
+                        Methods.endGame(event.getPlayer().getName());
+
+                        //Teleport him on spawn
+                        //Coords taken from the conf.yml file
+                        World Lobby = Bukkit.getServer().getWorld(getConfig().getString("lobbyspawn.spawnpoint.world"));
+                        double x = getConfig().getDouble("lobbyspawn.spawnpoint.x");
+                        double y = getConfig().getDouble("lobbyspawn.spawnpoint.y");
+                        double z = getConfig().getDouble("lobbyspawn.spawnpoint.z");
+                        double yaw = getConfig().getDouble("lobbyspawn.spawnpoint.yaw");
+                        double pitch = getConfig().getDouble("lobbyspawn.spawnpoint.pitch");
+                        Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
+
+                        //Ten Ticks delay that allows right teleport
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
+                            }
+                        }.runTaskLater(this, 10L);
+
+                    }
+                }
+            }
+        }
     }
 
 
