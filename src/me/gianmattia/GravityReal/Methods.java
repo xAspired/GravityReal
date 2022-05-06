@@ -6,17 +6,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.bukkit.Bukkit.getServer;
-import static org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH;
-
+@SuppressWarnings({"deprecation", "ConstantConditions"})
 public class Methods {
     static public boolean isGameStarted = false;
+    static public boolean isGameEnded = false;
+    public static int playerInGame = 0;
+    public static String [] nameMaps;
+    public static HashMap<String, Integer> map = new HashMap<>();
+
 
     public static void startGame() {
         if(!isGameStarted) {
@@ -29,7 +33,7 @@ public class Methods {
             int numberMaps;
 
             //Number of maps players will play in a Game (can be set in the config)
-            String [] nameMaps = new String[Main.getInstance().config.getInt("maps-per-game")];
+            nameMaps = new String[Main.getInstance().config.getInt("maps-per-game")];
             StringBuilder nameMapsConcatenated = new StringBuilder();
 
             //Check if the value of numberMaps is null (there aren't maps set in the config)
@@ -57,19 +61,19 @@ public class Methods {
                     //Try and catch for those who wrongly remove manually the "difficulty" string from config file
                     try {
                         if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("easy"))
-                            nameMapsConcatenated.append(ChatColor.GREEN + nameMaps[count]);
+                            nameMapsConcatenated.append(ChatColor.GREEN).append(nameMaps[count]);
                         else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("medium"))
-                            nameMapsConcatenated.append(ChatColor.YELLOW + nameMaps[count]);
+                            nameMapsConcatenated.append(ChatColor.YELLOW).append(nameMaps[count]);
                         else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("hard"))
-                            nameMapsConcatenated.append(ChatColor.RED + nameMaps[count]);
+                            nameMapsConcatenated.append(ChatColor.RED).append(nameMaps[count]);
                     }
                     catch (Exception e) {
-                        nameMapsConcatenated.append(ChatColor.WHITE + nameMaps[count]);
+                        nameMapsConcatenated.append(ChatColor.WHITE).append(nameMaps[count]);
                     }
 
                     //Settings to don't add the minus at the end of the StringBuilder
                     if(count < nameMaps.length - 1)
-                        nameMapsConcatenated.append(ChatColor.WHITE + " - ");
+                        nameMapsConcatenated.append(ChatColor.WHITE).append(" - ");
                 }
             }
             else {
@@ -87,6 +91,7 @@ public class Methods {
                     int countdownStarter = 2;
                     public void run() {
                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.valueOf(nameMapsConcatenated)));
+                        playerInGame++;
 
                         if (--countdownStarter < 0) {
                             cancel();
@@ -124,8 +129,8 @@ public class Methods {
                             10 Seconds' Countdown
              ********************************************** */
 
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY +  "...");
 
+            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY +  "...");
             new BukkitRunnable() {
                 int countdownStarter = 10;
                 public void run() {
@@ -134,7 +139,7 @@ public class Methods {
                     if (--countdownStarter < 0) {
                         //Teleport all players to the first map spawn
                         for (Player player : getServer().getOnlinePlayers()) {
-                            teleportAll(player, firstMap, x, y, z, (float) yaw, (float) pitch);
+                            teleportPlayer(player, firstMap, x, y, z, (float) yaw, (float) pitch);
                             player.setMaxHealth(6);
                             player.setHealthScale(6);
                         }
@@ -145,7 +150,42 @@ public class Methods {
 
         }
     }
-    public static void teleportAll(Player player, World map, double x, double y, double z, float yaw, float pitch) {
+
+    public static void endGame(String playerWin) {
+        if(!isGameEnded) {
+            isGameEnded = true;
+            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + playerWin + ChatColor.YELLOW + " finished the game!");
+
+            new BukkitRunnable() {
+                int countdownStarter = 240;
+                public void run() {
+                    if(countdownStarter==240)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                    else if(countdownStarter==180)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                    else if(countdownStarter==120)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                    else if(countdownStarter==60)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                    else if(countdownStarter==3)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                    else if(countdownStarter==2)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                    else if(countdownStarter==1)
+                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 1 seconds ");
+
+                    if (--countdownStarter < 0) {
+                        for (Player player : getServer().getOnlinePlayers()) {
+                            player.performCommand("spawn");
+                        }
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(Main.getInstance(), 20, 20);
+        }
+    }
+
+    public static void teleportPlayer(Player player, World map, double x, double y, double z, float yaw, float pitch) {
         player.teleport(new Location(map, x, y, z, yaw, pitch));
     }
 
