@@ -18,8 +18,8 @@ public class Methods {
     static public boolean isGameStarted = false;
     static public boolean isGameEnded = false;
     public static int playerInGame = 0;
-    public static String [] nameMaps;
-    public static HashMap<String, Integer> map = new HashMap<>();
+    public static HashMap<String, Integer> mapsIndex = new HashMap<>();
+    public static HashMap<Integer, String> indexMaps = new HashMap<>();
 
 
     public static void startGame() {
@@ -33,7 +33,6 @@ public class Methods {
             int numberMaps;
 
             //Number of maps players will play in a Game (can be set in the config)
-            nameMaps = new String[Main.getInstance().config.getInt("maps-per-game")];
             StringBuilder nameMapsConcatenated = new StringBuilder();
 
             //Check if the value of numberMaps is null (there aren't maps set in the config)
@@ -47,32 +46,35 @@ public class Methods {
 
             //Check if someone inserted a wrong value to 'maps-per-game' in config
             //The code can't run if 'maps-per-game' are set to 5 but there are 3 maps set
-            if(numberMaps >= nameMaps.length) {
+            if(numberMaps >= Main.getInstance().config.getInt("maps-per-game")) {
                 //Array based on the number of maps
                 ArrayList<Integer> tempNumberList = new ArrayList<>(numberMaps);
                 for (int i = 0; i < numberMaps; i++) {
                     tempNumberList.add(i);
                 }
-                for (int count = 0; count < nameMaps.length; count++) {
-                    nameMaps[count] = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
-                    System.out.println("nameMaps[" + count + "]: " + nameMaps[count]);
+                for (int count = 0; count < Main.getInstance().config.getInt("maps-per-game"); count++) {
+
+                    //Randomized map
+                    String nameMapFor = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
+                    mapsIndex.put(nameMapFor, count);
+                    indexMaps.put(count, nameMapFor);
 
                     //Different Color for Different Difficulty
                     //Try and catch for those who wrongly remove manually the "difficulty" string from config file
                     try {
-                        if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("easy"))
-                            nameMapsConcatenated.append(ChatColor.GREEN).append(nameMaps[count]);
-                        else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("medium"))
-                            nameMapsConcatenated.append(ChatColor.YELLOW).append(nameMaps[count]);
-                        else if (Main.getInstance().getConfig().getString("maps." + nameMaps[count] + ".difficulty").equalsIgnoreCase("hard"))
-                            nameMapsConcatenated.append(ChatColor.RED).append(nameMaps[count]);
+                        if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("easy"))
+                            nameMapsConcatenated.append(ChatColor.GREEN).append(indexMaps.get(count));
+                        else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("medium"))
+                            nameMapsConcatenated.append(ChatColor.YELLOW).append(indexMaps.get(count));
+                        else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("hard"))
+                            nameMapsConcatenated.append(ChatColor.RED).append(indexMaps.get(count));
                     }
                     catch (Exception e) {
-                        nameMapsConcatenated.append(ChatColor.WHITE).append(nameMaps[count]);
+                        nameMapsConcatenated.append(ChatColor.WHITE).append(indexMaps.get(count));
                     }
 
                     //Settings to don't add the minus at the end of the StringBuilder
-                    if(count < nameMaps.length - 1)
+                    if(count < Main.getInstance().config.getInt("maps-per-game") - 1)
                         nameMapsConcatenated.append(ChatColor.WHITE).append(" - ");
                 }
             }
@@ -108,8 +110,8 @@ public class Methods {
             //If some spanwpoints are not set:
             try {
                 //Create a new virtual world
-                firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + nameMaps[0] + ".spawnpoint.world"));
-                System.out.println(firstMap);
+                firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + indexMaps.get(0) + ".spawnpoint.world"));
+                //System.out.println(firstMap);
             }
             catch (Exception e) {
                 Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game couldn't start because there are some maps without spawnpoint. Check in the config and set it with /gravity setmapspawn <map>");
@@ -118,11 +120,11 @@ public class Methods {
             }
 
             //Coords taken from the conf.yml file
-            double x = Main.getInstance().getConfig().getDouble("maps." + nameMaps[0] + ".spawnpoint.x");
-            double y = Main.getInstance().getConfig().getDouble("maps." + nameMaps[0] + ".spawnpoint.y");
-            double z = Main.getInstance().getConfig().getDouble("maps." + nameMaps[0] + ".spawnpoint.z");
-            double yaw = Main.getInstance().getConfig().getDouble("maps." + nameMaps[0] + ".spawnpoint.yaw");
-            double pitch = Main.getInstance().getConfig().getDouble("maps." + nameMaps[0] + ".spawnpoint.pitch");
+            double x = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.x");
+            double y = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.y");
+            double z = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.z");
+            double yaw = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.yaw");
+            double pitch = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.pitch");
 
 
             /* **********************************************
@@ -159,6 +161,9 @@ public class Methods {
             new BukkitRunnable() {
                 int countdownStarter = 240;
                 public void run() {
+                    if(!isGameEnded)
+                        cancel();
+
                     if(countdownStarter==240)
                         Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 240 seconds ");
                     else if(countdownStarter==180)
