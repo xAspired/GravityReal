@@ -15,9 +15,17 @@ import java.util.HashMap;
 import static org.bukkit.Bukkit.getServer;
 @SuppressWarnings({"deprecation", "ConstantConditions"})
 public class Methods {
-    static public boolean isGameStarted = false;
-    static public boolean isGameEnded = false;
-    public static int playerInGame = 0;
+
+    //Game Start/End
+    public static boolean isGameStarted = false;
+    public static boolean isGameEnded = false;
+    public static Player winPlayer;
+
+    //Timer
+    public static boolean isTimerStarted = false;
+    public static int countdownReverse = 0;
+
+    //Maps
     public static HashMap<String, Integer> mapsIndex = new HashMap<>();
     public static HashMap<Integer, String> indexMaps = new HashMap<>();
 
@@ -25,7 +33,6 @@ public class Methods {
     public static void startGame() {
         if(!isGameStarted) {
             isGameStarted = true;
-
             /* **********************************************
                         Random Map Generation
              ********************************************** */
@@ -93,7 +100,6 @@ public class Methods {
                     int countdownStarter = 2;
                     public void run() {
                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(String.valueOf(nameMapsConcatenated)));
-                        playerInGame++;
 
                         if (--countdownStarter < 0) {
                             cancel();
@@ -139,11 +145,20 @@ public class Methods {
                     Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + countdownStarter);
 
                     if (--countdownStarter < 0) {
-                        //Teleport all players to the first map spawn
+                        /* **********************************************
+                                Teleport All Players to First Map
+                        ********************************************** */
                         for (Player player : getServer().getOnlinePlayers()) {
-                            teleportPlayer(player, firstMap, x, y, z, (float) yaw, (float) pitch);
+                            teleportPlayer(player, firstMap, x, y, z, (float) yaw, (float) pitch); //Teleport All
+
+                            //Health Setup
                             player.setMaxHealth(6);
                             player.setHealthScale(6);
+
+
+                            Main.getInstance().createBoard(player); //Creation of the Board
+                            timerPlayers(); //Start timer
+
                         }
                         cancel();
                     }
@@ -153,10 +168,11 @@ public class Methods {
         }
     }
 
-    public static void endGame(String playerWin) {
+    public static void endGame(Player playerWin) {
         if(!isGameEnded) {
             isGameEnded = true;
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + playerWin + ChatColor.YELLOW + " finished the game!");
+            winPlayer = playerWin;
+            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
 
             new BukkitRunnable() {
                 int countdownStarter = 240;
@@ -192,6 +208,37 @@ public class Methods {
 
     public static void teleportPlayer(Player player, World map, double x, double y, double z, float yaw, float pitch) {
         player.teleport(new Location(map, x, y, z, yaw, pitch));
+    }
+
+    public static int timerPlayers() {
+
+        if (!(isTimerStarted)) {
+            isTimerStarted = true;
+        /* **********************************************
+                                Timer
+        ********************************************** */
+            new BukkitRunnable() {
+                public void run() {
+
+                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time")) {
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(Main.getInstance(), 20, 20);
+
+        }
+
+        return countdownReverse;
+    }
+
+    public static String returnTimeFormatted(int seconds) {
+        int sec = seconds % 60;
+        int min = (seconds / 60)%60;
+
+        String strSec=(sec<10)?"0"+ sec :Integer.toString(sec);
+        String strmin=(min<10)?"0"+ min :Integer.toString(min);
+
+        return(strmin + ":" + strSec);
     }
 
 

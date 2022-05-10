@@ -1,5 +1,7 @@
 package me.gianmattia.GravityReal;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -9,8 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -19,6 +20,7 @@ public class CommandGravity implements CommandExecutor {
     @SuppressWarnings( "deprecation" )
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
         //If the command is sent by console e.g.
         if (!(sender instanceof Player player)) {
             sender.sendMessage("This command is runnable only by players");
@@ -60,10 +62,25 @@ public class CommandGravity implements CommandExecutor {
              ********************************************** */
 
             else if(command.getName().equalsIgnoreCase("debug")) {
-                System.out.println("GetKeys False: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false));
-                System.out.println("toArray[2]: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[1]);
-                System.out.println("ArraysToString toArray: " + Arrays.toString(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()));
-                System.out.println("Contains GreenHill: " + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains("Ciaone")); //Output: true/false
+                // create multimap to store key and values
+                Multimap<String, String> playerMapTime = ArrayListMultimap.create();
+
+                // put values into map for A
+                playerMapTime.put(((Player) sender).getDisplayName(), ((Player) sender).getWorld().getName());
+                playerMapTime.put(((Player) sender).getDisplayName(), Methods.countdownReverse + "");
+
+                // get all the set of keys
+                Set<String> keys = playerMapTime.keySet();
+
+                // iterate through the key set and display key and values
+                for (String key : keys) {
+                    System.out.println("Key = " + key);
+                    System.out.println("Values = " + playerMapTime.get(key).toArray()[0]);
+                    System.out.println("Values = " + playerMapTime.get(key).toArray()[1]);
+                }
+
+                System.out.println(playerMapTime);
+                System.out.println("Countdown: " + Methods.countdownReverse );
                 return true;
             }
 

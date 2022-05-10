@@ -11,15 +11,24 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.*;
 
 import java.util.HashMap;
 import java.util.Objects;
+
 
 @SuppressWarnings("ConstantConditions")
 public class Main extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
     public static Main mainInstance;
-    public HashMap<Player, Integer> maps = new HashMap<>();
+
+
+    /* **********************************************
+                  Board Variables
+    ********************************************** */
+    public static HashMap<Player, Integer> playerMap = new HashMap<>();
+    public static HashMap<Player, Integer> playerTime = new HashMap<>();
+    Player firstOne;
 
 
     @Override
@@ -58,7 +67,79 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by Gianmattia - " +  "Plugin Disabled Successfully!");
     }
 
-    // This method checks for incoming players and sends them a message
+    public void createBoard(Player player) {
+        boolean isPMEmpty = false;
+        //Verify that someone has entered in the first portal
+        if (playerMap.isEmpty()) {
+            playerMap.put(player, 0); //Setting all maps to 0 to all players
+            isPMEmpty = true;
+        }
+
+
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard board = manager.getNewScoreboard();
+        Objective obj = board.registerNewObjective("GravityScore", "forDummy", ChatColor.translateAlternateColorCodes('&', "&a&lGra&b&lvity"));
+        obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+        Score score11 = obj.getScore(ChatColor.DARK_GRAY + " ");
+        score11.setScore(11);
+        Score score10 = obj.getScore(ChatColor.YELLOW + ChatColor.BOLD.toString() + "Your Stats:" );
+        score10.setScore(10);
+        Score score9 = obj.getScore("  " + ChatColor.WHITE + player.getName());
+        score9.setScore(9);
+        Score score8 = obj.getScore("   ");
+        score8.setScore(8);
+        Score score7 = obj.getScore("  ");
+        score7.setScore(7);
+        Score score6 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Ranking:" );
+        score6.setScore(6);
+
+        //Checks if the variable is not inizialized ==> There are no players
+        if(!(isPMEmpty)) {
+            System.out.println("firstOne " + firstOne);
+
+
+            //Checks it for each player on the server
+            for (Player playerInFor : getServer().getOnlinePlayers()) {
+                //If the map of 'playerInFor' is higher than firstOne, than surely 'playerInFor' is now the 'firstOne'
+                if (playerMap.get(playerInFor) > playerMap.get(firstOne))
+                    firstOne = playerInFor;
+            }
+
+            Score score5;
+            if (playerMap.get(firstOne) == Main.getInstance().config.getInt("maps-per-game"))
+                score5 = obj.getScore(ChatColor.GREEN + "1#  " + firstOne.getName() + " " + ChatColor.GRAY + Methods.returnTimeFormatted(playerTime.get(firstOne)));
+            else
+                score5 = obj.getScore(ChatColor.WHITE + "1#  " + firstOne.getName());
+
+            score5.setScore(5);
+            Score score4 = obj.getScore(ChatColor.WHITE + "2#  Waiting...");
+            score4.setScore(4);
+            Score score3 = obj.getScore(ChatColor.WHITE + "3#  Waiting...");
+            score3.setScore(3);
+            Score score2 = obj.getScore(ChatColor.WHITE + "4#  Waiting...");
+            score2.setScore(2);
+            Score score1 = obj.getScore(ChatColor.WHITE + "5#  Waiting...");
+            score1.setScore(1);
+
+
+        }
+        else {
+            Score score5 = obj.getScore(ChatColor.WHITE + "1#  Waiting...");
+            score5.setScore(5);
+            Score score4 = obj.getScore(ChatColor.WHITE + "2#  Waiting...");
+            score4.setScore(4);
+            Score score3 = obj.getScore(ChatColor.WHITE + "3#  Waiting...");
+            score3.setScore(3);
+            Score score2 = obj.getScore(ChatColor.WHITE + "4#  Waiting...");
+            score2.setScore(2);
+            Score score1 = obj.getScore(ChatColor.WHITE + "5#  Waiting...");
+            score1.setScore(1);
+        }
+
+
+        player.setScoreboard(board);
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         int maxPlayers = config.getInt("max-players");
@@ -98,8 +179,11 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players are the ones inserted in the config
-        if(Bukkit.getOnlinePlayers().size() == minPlayers)
+        if(Bukkit.getOnlinePlayers().size() == minPlayers) {
             Methods.startGame();
+
+            firstOne = (Player) getServer().getOnlinePlayers().toArray()[0]; //Take the first one player, just for filling the variable
+        }
 
     }
 
@@ -120,16 +204,25 @@ public class Main extends JavaPlugin implements Listener {
         event.setDeathMessage(null);
     }
 
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         if(Methods.isGameStarted) {
             if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL) {
                 event.setCancelled(true);
 
+                //Put time and Map for Player
+                playerMap.put(event.getPlayer(), playerMap.get(event.getPlayer()) + 1);
+                playerTime.put(event.getPlayer(), Methods.countdownReverse);
+
+                for (Player betweenAllPlayer : getServer().getOnlinePlayers()) {
+                    createBoard(betweenAllPlayer);
+                }
+
                 //Check if the map of the player is equal to the last map
                 //I verify that the index of the given maps (I take the world of event player) is equal to the number written in config minus one
                 if (Methods.mapsIndex.get(event.getPlayer().getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1)) {
-                    Methods.endGame(event.getPlayer().getName());
+                    Methods.endGame(event.getPlayer());
 
                     //Teleport him on spawn
                     //Coords taken from the conf.yml file
