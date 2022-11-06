@@ -68,13 +68,6 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void createBoard(Player player) {
-        boolean isPMEmpty = false;
-        //Verify that someone has entered in the first portal
-        if (playerMap.isEmpty()) {
-            playerMap.put(player, 0); //Setting all maps to 0 to all players
-            isPMEmpty = true;
-        }
-
 
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         Scoreboard board = manager.getNewScoreboard();
@@ -93,48 +86,36 @@ public class Main extends JavaPlugin implements Listener {
         Score score6 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Ranking:" );
         score6.setScore(6);
 
-        //Checks if the variable is not inizialized ==> There are no players
-        if(!(isPMEmpty)) {
-            System.out.println("firstOne " + firstOne);
+        System.out.println("firstOne " + firstOne);
+        System.out.println("playerMap " + playerMap.get(firstOne));
 
+        //Checks it for each player on the server
+        for (Player playerInFor : getServer().getOnlinePlayers()) {
 
-            //Checks it for each player on the server
-            for (Player playerInFor : getServer().getOnlinePlayers()) {
-                //If the map of 'playerInFor' is higher than firstOne, than surely 'playerInFor' is now the 'firstOne'
-                if (playerMap.get(playerInFor) > playerMap.get(firstOne))
-                    firstOne = playerInFor;
+            //If the map of 'playerInFor' is higher than firstOne, than surely 'playerInFor' is now the 'firstOne'
+            if (!(playerInFor.equals(firstOne)) && playerMap.get(playerInFor) > playerMap.get(firstOne)) {
+                firstOne = playerInFor;
             }
-
-            Score score5;
-            if (playerMap.get(firstOne) == Main.getInstance().config.getInt("maps-per-game"))
-                score5 = obj.getScore(ChatColor.GREEN + "1#  " + firstOne.getName() + " " + ChatColor.GRAY + Methods.returnTimeFormatted(playerTime.get(firstOne)));
-            else
-                score5 = obj.getScore(ChatColor.WHITE + "1#  " + firstOne.getName());
-
-            score5.setScore(5);
-            Score score4 = obj.getScore(ChatColor.WHITE + "2#  Waiting...");
-            score4.setScore(4);
-            Score score3 = obj.getScore(ChatColor.WHITE + "3#  Waiting...");
-            score3.setScore(3);
-            Score score2 = obj.getScore(ChatColor.WHITE + "4#  Waiting...");
-            score2.setScore(2);
-            Score score1 = obj.getScore(ChatColor.WHITE + "5#  Waiting...");
-            score1.setScore(1);
-
-
         }
-        else {
-            Score score5 = obj.getScore(ChatColor.WHITE + "1#  Waiting...");
-            score5.setScore(5);
-            Score score4 = obj.getScore(ChatColor.WHITE + "2#  Waiting...");
-            score4.setScore(4);
-            Score score3 = obj.getScore(ChatColor.WHITE + "3#  Waiting...");
-            score3.setScore(3);
-            Score score2 = obj.getScore(ChatColor.WHITE + "4#  Waiting...");
-            score2.setScore(2);
-            Score score1 = obj.getScore(ChatColor.WHITE + "5#  Waiting...");
-            score1.setScore(1);
-        }
+
+        Score score5;
+        if (playerMap.get(firstOne) == Main.getInstance().config.getInt("maps-per-game"))
+            score5 = obj.getScore(ChatColor.GREEN + "1#  " + firstOne.getName() + " " + ChatColor.GRAY + Methods.returnTimeFormatted(playerTime.get(firstOne)));
+        //If someone has entered the first portal
+        else if (playerMap.get(firstOne) != 0)
+            score5 = obj.getScore(ChatColor.WHITE + "1#  " + firstOne.getName());
+        else
+            score5 = obj.getScore(ChatColor.WHITE + "1#  Waiting...");
+
+        score5.setScore(5);
+        Score score4 = obj.getScore(ChatColor.WHITE + "2#  Waiting...");
+        score4.setScore(4);
+        Score score3 = obj.getScore(ChatColor.WHITE + "3#  Waiting...");
+        score3.setScore(3);
+        Score score2 = obj.getScore(ChatColor.WHITE + "4#  Waiting...");
+        score2.setScore(2);
+        Score score1 = obj.getScore(ChatColor.WHITE + "5#  Waiting...");
+        score1.setScore(1);
 
 
         player.setScoreboard(board);
@@ -142,6 +123,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        System.out.println("Timer Player: " + playerTime.get(event.getPlayer()));
         int maxPlayers = config.getInt("max-players");
         int minPlayers = config.getInt("min-players");
 
@@ -179,10 +161,13 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players are the ones inserted in the config
-        if(Bukkit.getOnlinePlayers().size() == minPlayers) {
+        if(Bukkit.getOnlinePlayers().size() >= minPlayers) {
             Methods.startGame();
 
-            firstOne = (Player) getServer().getOnlinePlayers().toArray()[0]; //Take the first one player, just for filling the variable
+            //firstOne should be initialized only one time; so I just verify that is empty or not
+            if(firstOne == null)
+                firstOne = (Player) getServer().getOnlinePlayers().toArray()[0]; //Take the first one player, just for filling the variable
+            playerMap.put(event.getPlayer(), 0);
         }
 
     }
@@ -191,11 +176,15 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
+        playerMap.put(event.getPlayer(), 0);
+        playerTime.put(event.getPlayer(), 0);
 
         //If there is no one on the Server, Game will stop
         if(Bukkit.getOnlinePlayers().size() == 1) {
             Methods.isGameStarted = false;
             Methods.isGameEnded = false;
+            Methods.isTimerStarted = false;
+            Methods.countdownReverse = 0;
         }
     }
 

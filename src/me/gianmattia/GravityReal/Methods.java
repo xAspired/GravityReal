@@ -19,7 +19,6 @@ public class Methods {
     //Game Start/End
     public static boolean isGameStarted = false;
     public static boolean isGameEnded = false;
-    public static Player winPlayer;
 
     //Timer
     public static boolean isTimerStarted = false;
@@ -171,8 +170,8 @@ public class Methods {
     public static void endGame(Player playerWin) {
         if(!isGameEnded) {
             isGameEnded = true;
-            winPlayer = playerWin;
             Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
+            System.out.println("Timer: " + returnTimeFormatted(Main.getInstance().playerTime.get(playerWin)));
 
             new BukkitRunnable() {
                 int countdownStarter = 240;
@@ -210,7 +209,7 @@ public class Methods {
         player.teleport(new Location(map, x, y, z, yaw, pitch));
     }
 
-    public static int timerPlayers() {
+    public static void timerPlayers() {
 
         if (!(isTimerStarted)) {
             isTimerStarted = true;
@@ -220,7 +219,7 @@ public class Methods {
             new BukkitRunnable() {
                 public void run() {
 
-                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time")) {
+                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time") || Bukkit.getOnlinePlayers().size() == 0) {
                         cancel();
                     }
                 }
@@ -228,7 +227,6 @@ public class Methods {
 
         }
 
-        return countdownReverse;
     }
 
     public static String returnTimeFormatted(int seconds) {
