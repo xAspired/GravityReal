@@ -4,7 +4,7 @@
     <root id="archive" name="GravityReal.jar">
       <element id="module-output" name="GravityReal" />
       <element id="extracted-dir" path="$USER_HOME$/Documents/Dependencies Plugin/spigot-1.17.jar" path-in-jar="/" />
-      <element id="file-copy" path="$PROJECT_DIR$/src/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/java/plugin.yml" />
     </root>
   </artifact>
 </component>

@@ -5,6 +5,7 @@
 This is my First JavaPlugin, so please don't kill me if some syntax still isn't perfect.
 
 ## How to use
+
 1. Place GravityReal into your plugins folder
 2. Restart your Server (a folder will be created)
 3. Edit the config.yml how you want and setup new maps
@@ -14,6 +15,7 @@ This is my First JavaPlugin, so please don't kill me if some syntax still isn't 
 !! Read the release notes carefully, but you may have to delete the old config.yml to use a new one.
 
 ## Permissions
+
 If your permissions plugin strips permissions then you may have to allocate these manually.
 
 ```

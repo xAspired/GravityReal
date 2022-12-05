@@ -15,32 +15,39 @@ import java.util.*;
 
 
 @SuppressWarnings("ConstantConditions")
-public class CommandGravity implements CommandExecutor {
+public class CommandGravity implements CommandExecutor
+{
 
-    @SuppressWarnings( "deprecation" )
+    @SuppressWarnings("deprecation")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
+    {
 
         //If the command is sent by console e.g.
-        if (!(sender instanceof Player player)) {
+        if (!(sender instanceof Player player))
+        {
             sender.sendMessage("This command is runnable only by players");
             return true;
         }
 
         //If the command doesn't have any arguments (is one and stop e.g /gravity, /setspawnlobby)
-        if (args.length == 0) {
+        if (args.length == 0)
+        {
 
             /* **********************************************
                         Spawn Command (for the Lobby)
              ********************************************** */
 
-            if(command.getName().equalsIgnoreCase("spawn")) {
+            if (command.getName().equalsIgnoreCase("spawn"))
+            {
 
                 //If the spawn is not set
-                if(Objects.equals(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"), "0")) {
+                if (Objects.equals(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"), "0"))
+                {
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn is not set!");
                 }
-                else {
+                else
+                {
 
                     //Create a new virtual object named world, that names is the same as the one in the config
                     World Lobby = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"));
@@ -61,7 +68,8 @@ public class CommandGravity implements CommandExecutor {
                     Debug Command
              ********************************************** */
 
-            else if(command.getName().equalsIgnoreCase("debug")) {
+            else if (command.getName().equalsIgnoreCase("debug"))
+            {
                 // create multimap to store key and values
                 Multimap<String, String> playerMapTime = ArrayListMultimap.create();
 
@@ -73,14 +81,15 @@ public class CommandGravity implements CommandExecutor {
                 Set<String> keys = playerMapTime.keySet();
 
                 // iterate through the key set and display key and values
-                for (String key : keys) {
+                for (String key : keys)
+                {
                     System.out.println("Key = " + key);
                     System.out.println("Values = " + playerMapTime.get(key).toArray()[0]);
                     System.out.println("Values = " + playerMapTime.get(key).toArray()[1]);
                 }
 
                 System.out.println(playerMapTime);
-                System.out.println("Countdown: " + Methods.countdownReverse );
+                System.out.println("Countdown: " + Methods.countdownReverse);
                 return true;
             }
 
@@ -89,7 +98,8 @@ public class CommandGravity implements CommandExecutor {
                     Help List of Commands
              ********************************************** */
 
-            else {
+            else
+            {
                 // Command Gravity Admin
                 player.sendMessage(ChatColor.GRAY + "|--------------------------------------------|");
                 player.sendMessage(ChatColor.AQUA + "               Gra" + ChatColor.GREEN + "vity " + ChatColor.GRAY + "by Gianmattia");
@@ -111,14 +121,16 @@ public class CommandGravity implements CommandExecutor {
         /* **********************************************
                  /gravity createmap <map> - Command
         ********************************************** */
-        else if (args[0].equalsIgnoreCase("createmap")) {
+        else if (args[0].equalsIgnoreCase("createmap"))
+        {
             String nameMap;
 
             //Check that player have wrote the name of the map
-            try {
+            try
+            {
                 nameMap = args[1];
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name for your new map!");
                 return true;
             }
@@ -126,16 +138,21 @@ public class CommandGravity implements CommandExecutor {
 
 
             //If the name of the map already exists
-            try {
-                if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            try
+            {
+                if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap))
+                {
 
                     //Set isFor to true if the name of the map already exists
                     isFor = true;
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored)
+            {
+            }
 
 
-            if(!isFor) {
+            if (!isFor)
+            {
                 //Adding blank values under the name of the map. Then, when someone type /gravity setmapspawn <map> the values are overwritten
                 //I need to add a number first, that's the header of the map (e.g. 3)
 
@@ -151,10 +168,11 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().saveConfig();
 
 
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY +  " created!");
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " created!");
 
             }
-            else {
+            else
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map already exists!");
             }
 
@@ -164,20 +182,23 @@ public class CommandGravity implements CommandExecutor {
         /* **********************************************
                   /gravity setmapspawn <map> - Command
         ********************************************** */
-        else if (args[0].equalsIgnoreCase("setmapspawn")) {
+        else if (args[0].equalsIgnoreCase("setmapspawn"))
+        {
             String nameMap;
 
-            try {
+            try
+            {
                 nameMap = args[1];
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
             boolean isFor = false;
 
             //If the name of the map already exists
-            if(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap))
+            {
 
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.world", player.getLocation().getWorld().getName());
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.x", player.getLocation().getX());
@@ -189,15 +210,13 @@ public class CommandGravity implements CommandExecutor {
                 player.getLocation().getWorld().setGameRuleValue("doImmediateRespawn", "true");
 
 
-
-
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 
                 //Set isFor to true if the name of the map already exists
                 isFor = true;
             }
 
-            if(!isFor)
+            if (!isFor)
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
 
             return true;
@@ -206,28 +225,32 @@ public class CommandGravity implements CommandExecutor {
         /* **********************************************
                   /gravity setmapdiff <map> - Command
         ********************************************** */
-        else if (args[0].equalsIgnoreCase("setmapdiff")) {
+        else if (args[0].equalsIgnoreCase("setmapdiff"))
+        {
             String nameMap;
             String diffMap;
 
 
-            try {
+            try
+            {
                 nameMap = args[1];
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
 
             //Check player inserted the right difficulty
-            try {
+            try
+            {
                 diffMap = args[2];
-                if(!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard"))){
+                if (!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard")))
+                {
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
                     return true;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
                 return true;
             }
@@ -236,14 +259,15 @@ public class CommandGravity implements CommandExecutor {
             boolean isFor = false;
 
             //If the name of the map already exists
-            if(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap))
+            {
 
                 Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", diffMap);
                 Main.getInstance().saveConfig();
 
-                if(diffMap.equalsIgnoreCase("easy"))
+                if (diffMap.equalsIgnoreCase("easy"))
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.GREEN + "Easy" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
-                else if(diffMap.equalsIgnoreCase("medium"))
+                else if (diffMap.equalsIgnoreCase("medium"))
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.YELLOW + "Medium" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
                 else
                     player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.RED + "Hard" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
@@ -252,7 +276,7 @@ public class CommandGravity implements CommandExecutor {
                 isFor = true;
             }
 
-            if(!isFor)
+            if (!isFor)
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
 
             return true;
@@ -262,7 +286,8 @@ public class CommandGravity implements CommandExecutor {
                      /gravity reload Command
         ********************************************** */
 
-        else if(args[0].equalsIgnoreCase("reload")) {
+        else if (args[0].equalsIgnoreCase("reload"))
+        {
             Main.getInstance().reloadConfig();
             player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
             return true;
@@ -271,27 +296,31 @@ public class CommandGravity implements CommandExecutor {
         /* **********************************************
                    /gravity listmaps Command
         ********************************************** */
-        else if(args[0].equalsIgnoreCase("listmaps")) {
+        else if (args[0].equalsIgnoreCase("listmaps"))
+        {
 
             int numberMaps;
 
             //Check if there are maps in the config
-            try {
+            try
+            {
                 numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 numberMaps = 0;
             }
 
-            if(numberMaps == 0)
+            if (numberMaps == 0)
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "There is no map set yet");
-            else {
+            else
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Here is the list of maps:");
                 player.sendMessage(ChatColor.DARK_GRAY + "|| ");
             }
 
-            for(int i = 0; i<numberMaps; i++) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i+1) + ChatColor.GRAY + ". " + ChatColor.AQUA + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[i]);
+            for (int i = 0; i < numberMaps; i++)
+            {
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i + 1) + ChatColor.GRAY + ". " + ChatColor.AQUA + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[i]);
             }
 
             return true;
@@ -300,20 +329,23 @@ public class CommandGravity implements CommandExecutor {
         /* **********************************************
                  /gravity deletemap <map> Command
         ********************************************** */
-        else if(args[0].equalsIgnoreCase("deletemap")) {
+        else if (args[0].equalsIgnoreCase("deletemap"))
+        {
             String nameMap;
 
-            try {
+            try
+            {
                 nameMap = args[1];
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
             boolean isFor = false;
 
             //If the name of the map already exists
-            if(Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap))
+            {
 
                 Main.getInstance().getConfig().set("maps." + nameMap, null);
                 Main.getInstance().saveConfig();
@@ -325,7 +357,7 @@ public class CommandGravity implements CommandExecutor {
                 isFor = true;
             }
 
-            if(!isFor)
+            if (!isFor)
                 player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist!");
 
             return true;
@@ -335,7 +367,8 @@ public class CommandGravity implements CommandExecutor {
                 SetSpawnLobby Command (for the Lobby tho)
         ********************************************** */
 
-        else if(args[0].equalsIgnoreCase("setspawnlobby")) {
+        else if (args[0].equalsIgnoreCase("setspawnlobby"))
+        {
 
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.world", player.getLocation().getWorld().getName());
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.x", player.getLocation().getX());
