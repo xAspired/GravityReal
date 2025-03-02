@@ -19,8 +19,7 @@ import java.util.Objects;
 
 
 @SuppressWarnings("ConstantConditions")
-public class Main extends JavaPlugin implements Listener
-{
+public class Main extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
     public static Main mainInstance;
 
@@ -33,8 +32,7 @@ public class Main extends JavaPlugin implements Listener
 
 
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         mainInstance = this;
 
         // Save a copy of the default config.yml if one is not there
@@ -60,21 +58,18 @@ public class Main extends JavaPlugin implements Listener
 
     }
 
-    public static Main getInstance()
-    {
+    public static Main getInstance() {
         return mainInstance;
     }
 
     @Override
-    public void onDisable()
-    {
+    public void onDisable() {
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by Gianmattia - " + "Plugin Disabled Successfully!");
     }
 
     Player[] scorePlayer = {null, null, null, null, null};
     int[] scoreIndex = {0, 0, 0, 0, 0};
-    public void createBoard(Player player)
-    {
+    public void createBoard(Player player) {
 
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         Scoreboard board = manager.getNewScoreboard();
@@ -94,8 +89,7 @@ public class Main extends JavaPlugin implements Listener
         score6.setScore(6);
 
         //Checks it for each player on the server
-        for (Player playerInFor : getServer().getOnlinePlayers())
-        {
+        for (Player playerInFor : getServer().getOnlinePlayers()) {
 
             // Check if the player pass 1st map(index=0)
             if (playerMap.get(playerInFor) < 1)
@@ -103,10 +97,8 @@ public class Main extends JavaPlugin implements Listener
 
             // If the player was in scoreboard, update the index
             boolean flag = false;
-            for (int j = 0; j < 5; ++j)
-            {
-                if (scorePlayer[j] == playerInFor)
-                {
+            for (int j = 0; j < 5; ++j) {
+                if (scorePlayer[j] == playerInFor) {
                     scoreIndex[j] = playerMap.get(playerInFor);
                     flag = true;
                     break;
@@ -114,11 +106,9 @@ public class Main extends JavaPlugin implements Listener
             }
 
             // Otherwise, add place player to the last position if have map > lastmapplayer
-            if (!flag)
-            {
+            if (!flag) {
 
-                if (playerMap.get(playerInFor) > scoreIndex[4] | scorePlayer[4] == null)
-                {
+                if (playerMap.get(playerInFor) > scoreIndex[4] | scorePlayer[4] == null) {
                     scorePlayer[4] = playerInFor;
                     scoreIndex[4] = playerMap.get(playerInFor);
                 }
@@ -128,17 +118,14 @@ public class Main extends JavaPlugin implements Listener
         }
 
         // Bubble sort of scoreIndex
-        for (int i = 0; i < 5; ++i)
-        {
-            for (int j = i + 1; j < 5; ++j)
-            {
+        for (int i = 0; i < 5; ++i) {
+            for (int j = i + 1; j < 5; ++j) {
                 // If j>i is null skip because 5>1>null
                 if (scorePlayer[j] == null)
                     continue;
 
                 // Sort by time of player on the same maps
-                if (scoreIndex[j] == scoreIndex[i] && playerTime.get(scorePlayer[j]) < playerTime.get(scorePlayer[i]) )
-                {
+                if (scoreIndex[j] == scoreIndex[i] && playerTime.get(scorePlayer[j]) < playerTime.get(scorePlayer[i]) ) {
                     int tempscore = scoreIndex[j];
                     Player tempplayer = scorePlayer[j];
 
@@ -152,8 +139,7 @@ public class Main extends JavaPlugin implements Listener
                 }
 
                 // If [j]>[i] or [i] is null, exchange
-                if (scoreIndex[j] > scoreIndex[i] || scorePlayer[i] == null)
-                {
+                if (scoreIndex[j] > scoreIndex[i] || scorePlayer[i] == null) {
                     int tempscore = scoreIndex[j];
                     Player tempplayer = scorePlayer[j];
 
@@ -168,39 +154,30 @@ public class Main extends JavaPlugin implements Listener
 
         // Set up scoreboard 5 rows
         Score scores[] = new Score[5];
-        for (int i = 0; i < 5; ++i)
-        {
+        for (int i = 0; i < 5; ++i) {
 
             // Check if player is null (not arrived)
-            if (scorePlayer[i] == null)
-            {
+            if (scorePlayer[i] == null) {
                 scores[i] = obj.getScore(ChatColor.WHITE + String.valueOf(i + 1) + "#  Waiting...");
             }
-            else
-            {
+            else {
                 // Check if player has finished
-                if (playerMap.get(scorePlayer[i]) == Main.getInstance().config.getInt("maps-per-game"))
-                {
+                if (playerMap.get(scorePlayer[i]) == Main.getInstance().config.getInt("maps-per-game")) {
                     int realpos = i+1;
-                    if (realpos == 1)
-                    {
+                    if (realpos == 1) {
                         scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
-                    else if (realpos == 2)
-                    {
+                    else if (realpos == 2) {
                         scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
-                    else if (realpos == 3)
-                    {
+                    else if (realpos == 3) {
                         scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
-                    else
-                    {
+                    else {
                         scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
                 }
-                else
-                {
+                else {
                     scores[i] = obj.getScore(ChatColor.WHITE + String.valueOf(i + 1) + "#  " + scorePlayer[i].getName());
                 }
             }
@@ -213,8 +190,7 @@ public class Main extends JavaPlugin implements Listener
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event)
-    {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         System.out.println("Timer Player: " + playerTime.get(event.getPlayer()));
         int maxPlayers = config.getInt("max-players");
         int minPlayers = config.getInt("min-players");
@@ -231,8 +207,7 @@ public class Main extends JavaPlugin implements Listener
              ********************************************** */
 
         //If the spawnpoint is set
-        if (!(Objects.equals(getConfig().get("lobbyspawn.spawnpoint.world"), 0)))
-        {
+        if (!(Objects.equals(getConfig().get("lobbyspawn.spawnpoint.world"), 0))) {
 
             //Create a new virtual object named world, that names is the same as the one in the config
             World Lobby = Bukkit.getServer().getWorld(getConfig().getString("lobbyspawn.spawnpoint.world"));
@@ -254,8 +229,7 @@ public class Main extends JavaPlugin implements Listener
         Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players are the ones inserted in the config
-        if (Bukkit.getOnlinePlayers().size() >= minPlayers)
-        {
+        if (Bukkit.getOnlinePlayers().size() >= minPlayers) {
             Methods.startGame();
 
             playerMap.put(event.getPlayer(), 0);
@@ -264,16 +238,14 @@ public class Main extends JavaPlugin implements Listener
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event)
-    {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
         playerMap.put(event.getPlayer(), 0);
         playerTime.put(event.getPlayer(), 0);
 
         //If there is no one on the Server, Game will stop
-        if (Bukkit.getOnlinePlayers().size() == 1)
-        {
+        if (Bukkit.getOnlinePlayers().size() == 1) {
             Methods.isGameStarted = false;
             Methods.isGameEnded = false;
             Methods.isTimerStarted = false;
@@ -282,34 +254,28 @@ public class Main extends JavaPlugin implements Listener
     }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent event)
-    {
+    public void onDeath(PlayerDeathEvent event) {
         event.setDeathMessage(null);
     }
 
 
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
-        if (Methods.isGameStarted)
-        {
-            if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL)
-            {
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (Methods.isGameStarted) {
+            if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL) {
                 event.setCancelled(true);
 
                 //Put time and Map for Player
                 playerMap.put(event.getPlayer(), playerMap.get(event.getPlayer()) + 1);
                 playerTime.put(event.getPlayer(), Methods.countdownReverse);
 
-                for (Player betweenAllPlayer : getServer().getOnlinePlayers())
-                {
+                for (Player betweenAllPlayer : getServer().getOnlinePlayers()) {
                     createBoard(betweenAllPlayer);
                 }
 
                 //Check if the map of the player is equal to the last map
                 //I verify that the index of the given maps (I take the world of event player) is equal to the number written in config minus one
-                if (Methods.mapsIndex.get(event.getPlayer().getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1))
-                {
+                if (Methods.mapsIndex.get(event.getPlayer().getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1)) {
                     Methods.endGame(event.getPlayer());
 
                     //Teleport him on spawn
@@ -323,18 +289,16 @@ public class Main extends JavaPlugin implements Listener
                     Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
 
                     //Ten Ticks delay that allows right teleport
-                    new BukkitRunnable()
-                    {
+                    new BukkitRunnable() {
                         @Override
-                        public void run()
-                        {
+                        public void run() {
                             Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
                         }
                     }.runTaskLater(this, 10L);
                 }
+
                 //Verify that the result of the next map is not null
-                else if (!(Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)).isEmpty()))
-                {
+                else if (!(Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)).isEmpty())) {
                     World map = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.world"));
                     double x = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.x");
                     double y = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.y");
@@ -343,11 +307,9 @@ public class Main extends JavaPlugin implements Listener
                     double pitch = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.pitch");
                     Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
 
-                    new BukkitRunnable()
-                    {
+                    new BukkitRunnable() {
                         @Override
-                        public void run()
-                        {
+                        public void run() {
                             Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
                         }
                     }.runTaskLater(this, 10L);
@@ -355,7 +317,6 @@ public class Main extends JavaPlugin implements Listener
             }
         }
     }
-
 
 }
 

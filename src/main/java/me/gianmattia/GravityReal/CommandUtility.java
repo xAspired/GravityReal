@@ -7,24 +7,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class CommandUtility implements CommandExecutor
-{
+public class CommandUtility implements CommandExecutor {
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args)
-    {
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
 
         //If the command is sent by console e.g.
-        if (!(sender instanceof Player player))
-        {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("This command is runnable only by players");
             return true;
         }
 
         //If the command doesn't have any arguments (is one and stop e.g /gravity, /setspawnlobby)
-        if (args.length == 0)
-        {
-            if (command.getName().equalsIgnoreCase("coords"))
-            {
+        if (args.length == 0) {
+            if (command.getName().equalsIgnoreCase("coords")) {
                 player.sendMessage(ChatColor.YELLOW + "Coordinates: ");
                 player.sendMessage(ChatColor.YELLOW + " world: " + ChatColor.GRAY + player.getWorld().getName());
                 player.sendMessage(ChatColor.YELLOW + " x: " + ChatColor.GRAY + player.getLocation().getX());
@@ -33,15 +28,13 @@ public class CommandUtility implements CommandExecutor
 
                 return true;
             }
-            else if (command.getName().equalsIgnoreCase("gmc"))
-            {
+            else if (command.getName().equalsIgnoreCase("gmc")) {
                 player.setGameMode(GameMode.CREATIVE);
 
                 return true;
             }
 
         }
-
 
         return false;
     }
