@@ -117,40 +117,43 @@ public class Main extends JavaPlugin implements Listener {
 
         }
 
-        // Bubble sort of scoreIndex
-        for (int i = 0; i < 5; ++i) {
-            for (int j = i + 1; j < 5; ++j) {
-                // If j>i is null skip because 5>1>null
-                if (scorePlayer[j] == null)
+        for (int i = 0; i < 4; ++i) {
+            boolean swapped = false;
+
+            for (int j = 0; j < 4 - i; ++j) {
+                if (scorePlayer[j + 1] == null)
                     continue;
 
-                // Sort by time of player on the same maps
-                if (scoreIndex[j] == scoreIndex[i] && playerTime.get(scorePlayer[j]) < playerTime.get(scorePlayer[i]) ) {
-                    int tempscore = scoreIndex[j];
-                    Player tempplayer = scorePlayer[j];
+                boolean swapNeeded = false;
 
-                    scorePlayer[j] = scorePlayer[i];
-                    scoreIndex[j] = scoreIndex[i];
-
-                    scorePlayer[i] = tempplayer;
-                    scoreIndex[i] = tempscore;
-
-                    continue;
+                // Same index, check time
+                if (scoreIndex[j + 1] == scoreIndex[j] && playerTime.get(scorePlayer[j + 1]) < playerTime.get(scorePlayer[j])) {
+                    swapNeeded = true;
                 }
 
-                // If [j]>[i] or [i] is null, exchange
-                if (scoreIndex[j] > scoreIndex[i] || scorePlayer[i] == null) {
-                    int tempscore = scoreIndex[j];
-                    Player tempplayer = scorePlayer[j];
+                else if (scoreIndex[j + 1] > scoreIndex[j] || scorePlayer[j] == null) {
+                    swapNeeded = true;
+                }
 
-                    scorePlayer[j] = scorePlayer[i];
-                    scoreIndex[j] = scoreIndex[i];
+                if (swapNeeded) {
+                    // Swap using temp
+                    int tempScore = scoreIndex[j];
+                    scoreIndex[j] = scoreIndex[j + 1];
+                    scoreIndex[j + 1] = tempScore;
 
-                    scorePlayer[i] = tempplayer;
-                    scoreIndex[i] = tempscore;
+                    Player tempPlayer = scorePlayer[j];
+                    scorePlayer[j] = scorePlayer[j + 1];
+                    scorePlayer[j + 1] = tempPlayer;
+
+                    swapped = true;
                 }
             }
+
+            // If no swap has been done, the list is ordered
+            if (!swapped)
+                break;
         }
+
 
         // Set up scoreboard 5 rows
         Score scores[] = new Score[5];
