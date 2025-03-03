@@ -1,6 +1,5 @@
-package me.gianmattia.GravityReal;
+package me.xaspired.GravityReal;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -54,7 +53,7 @@ public class Main extends JavaPlugin implements Listener {
 
 
         //Send a message that shows that the plugin was enabled successfully
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by Gianmattia -  " + "Plugin Enabled Successfully!");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired -  " + "Plugin Enabled Successfully!");
 
     }
 
@@ -64,7 +63,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by Gianmattia - " + "Plugin Disabled Successfully!");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired - " + "Plugin Disabled Successfully!");
     }
 
     Player[] scorePlayer = {null, null, null, null, null};

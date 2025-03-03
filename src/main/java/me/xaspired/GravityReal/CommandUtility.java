@@ -1,4 +1,4 @@
-package me.gianmattia.GravityReal;
+package me.xaspired.GravityReal;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;

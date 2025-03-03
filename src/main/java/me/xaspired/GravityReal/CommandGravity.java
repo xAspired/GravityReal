@@ -1,4 +1,4 @@
-package me.gianmattia.GravityReal;
+package me.xaspired.GravityReal;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -92,7 +92,7 @@ public class CommandGravity implements CommandExecutor {
             else {
                 // Command Gravity Admin
                 player.sendMessage(ChatColor.GRAY + "|--------------------------------------------|");
-                player.sendMessage(ChatColor.AQUA + "               Gra" + ChatColor.GREEN + "vity " + ChatColor.GRAY + "by Gianmattia");
+                player.sendMessage(ChatColor.AQUA + "               Gra" + ChatColor.GREEN + "vity " + ChatColor.GRAY + "by xAspired");
                 player.sendMessage(ChatColor.GRAY + "        Here are a list of command you can type");
                 player.sendMessage(" ");
                 player.sendMessage(ChatColor.AQUA + " /gravity reload" + ChatColor.GRAY + " - Reloads the plugin");
