@@ -109,7 +109,7 @@ public class Methods {
             }
 
             /* **********************************************
-                   Create the Object fot the First Map
+                   Create the Object for the First Map
              ********************************************** */
             World firstMap;
 
@@ -220,7 +220,7 @@ public class Methods {
         if (!(isTimerStarted)) {
             isTimerStarted = true;
         /* **********************************************
-                                Timer
+                       Scoreboard Timer
         ********************************************** */
             new BukkitRunnable() {
                 public void run() {
