@@ -3,6 +3,7 @@
 ## Note: Java 17 and Minecraft 18 or higher are now required
 
 This is my First JavaPlugin, so please don't kill me if some syntax still isn't perfect.
+Actually is uploaded on Spigot through <a href="https://www.spigotmc.org/resources/gravityreal-the-ultimate-multiplayer-dropper-experience.123025/">this link</a>.
 
 ## How to use
 
