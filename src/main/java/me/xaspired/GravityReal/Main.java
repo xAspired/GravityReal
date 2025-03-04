@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -37,6 +38,11 @@ public class Main extends JavaPlugin implements Listener {
         // Save a copy of the default config.yml if one is not there
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+
+        // Load a config template only if it doesn't exist
+        File configTemplateFile = new File(getDataFolder(), "config_template.yml");
+        if (!configTemplateFile.exists())
+            saveResource("config_template.yml", true);
 
 
         //New command - Gravity
