@@ -252,6 +252,7 @@ public class Main extends JavaPlugin implements Listener {
         if (Bukkit.getOnlinePlayers().size() <= 1) {
             Methods.status = Methods.GameStatus.NOTYETSTARTED;
             Methods.countdownReverse = 0;
+            Methods.isTimerStarted = false;
         }
     }
 
