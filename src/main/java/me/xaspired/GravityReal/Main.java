@@ -199,6 +199,11 @@ public class Main extends JavaPlugin implements Listener {
     //@TODO: Se il game è ancora in progress non fare entrare il player dentro al server
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (Methods.status == Methods.GameStatus.STARTED || Methods.status == Methods.GameStatus.ENDING) {
+            event.getPlayer().kickPlayer("Game is still in progress");
+            return;
+        }
+
         int maxPlayers = config.getInt("max-players");
 
         Player player = event.getPlayer();
