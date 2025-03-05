@@ -172,16 +172,16 @@ public class Main extends JavaPlugin implements Listener {
                 if (playerMap.get(scorePlayer[i]) == Main.getInstance().config.getInt("maps-per-game")) {
                     int realpos = i+1;
                     if (realpos == 1) {
-                        scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
+                        scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
                     else if (realpos == 2) {
-                        scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
+                        scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
                     else if (realpos == 3) {
-                        scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
+                        scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
                     else {
-                        scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + Methods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
+                        scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + UsefulMethods.returnTimeFormatted(playerTime.get(scorePlayer[i])));
                     }
                 }
                 else {
@@ -196,12 +196,10 @@ public class Main extends JavaPlugin implements Listener {
         player.setScoreboard(board);
     }
 
+    //@TODO: Se il game è ancora in progress non fare entrare il player dentro al server
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        System.out.println("Timer Player: " + playerTime.get(event.getPlayer()));
         int maxPlayers = config.getInt("max-players");
-        int minPlayers = config.getInt("min-players");
-
 
         Player player = event.getPlayer();
 
@@ -211,7 +209,7 @@ public class Main extends JavaPlugin implements Listener {
 
         /* **********************************************
                 Teleport Player to 'Lobby Spawn'
-             ********************************************** */
+         ********************************************** */
 
         //If the spawnpoint is set
         if (!(Objects.equals(getConfig().get("lobbyspawn.spawnpoint.world"), 0))) {
@@ -236,9 +234,8 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players are the ones inserted in the config
-        if (Bukkit.getOnlinePlayers().size() >= minPlayers) {
-            Methods.startGame();
-
+        if (UsefulMethods.areMinPlayersOnline() && (Methods.status == Methods.GameStatus.NOTYETSTARTED || Methods.status == Methods.GameStatus.STARTEDCOUNTDOWN)) {
+            Methods.startGameCountdown();
             playerMap.put(event.getPlayer(), 0);
         }
 
@@ -252,10 +249,8 @@ public class Main extends JavaPlugin implements Listener {
         playerTime.put(event.getPlayer(), 0);
 
         //If there is no one on the Server, Game will stop
-        if (Bukkit.getOnlinePlayers().size() == 1) {
-            Methods.isGameStarted = false;
-            Methods.isGameEnded = false;
-            Methods.isTimerStarted = false;
+        if (Bukkit.getOnlinePlayers().size() <= 1) {
+            Methods.status = Methods.GameStatus.NOTYETSTARTED;
             Methods.countdownReverse = 0;
         }
     }
@@ -268,7 +263,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (Methods.isGameStarted) {
+        if (Methods.status == Methods.GameStatus.STARTED || Methods.status == Methods.GameStatus.ENDING) {
             if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL) {
                 event.setCancelled(true);
 
@@ -294,12 +289,12 @@ public class Main extends JavaPlugin implements Listener {
                     double z = getConfig().getDouble("lobbyspawn.spawnpoint.z");
                     double yaw = getConfig().getDouble("lobbyspawn.spawnpoint.yaw");
                     double pitch = getConfig().getDouble("lobbyspawn.spawnpoint.pitch");
-                    Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
+                    UsefulMethods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
 
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            Methods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
+                            UsefulMethods.teleportPlayer(event.getPlayer(), Lobby, x, y, z, (float) yaw, (float) pitch);
                         }
                     }.runTaskLater(this, 10L);
                 }
@@ -312,12 +307,12 @@ public class Main extends JavaPlugin implements Listener {
                     double z = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.z");
                     double yaw = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.yaw");
                     double pitch = Main.getInstance().getConfig().getDouble("maps." + Methods.indexMaps.get((Methods.mapsIndex.get(event.getPlayer().getWorld().getName()) + 1)) + ".spawnpoint.pitch");
-                    Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
+                    UsefulMethods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
 
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            Methods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
+                            UsefulMethods.teleportPlayer(event.getPlayer(), map, x, y, z, (float) yaw, (float) pitch);
                         }
                     }.runTaskLater(this, 10L);
                 }

@@ -29,7 +29,7 @@ public class CommandGravity implements CommandExecutor {
 
         //If the command doesn't have any arguments (is one and stop e.g /gravity, /setspawnlobby)
         if (args.length == 0) {
-
+        //@TODO: Fare un metodo per sto comando che si ripete anche in Main
             /* **********************************************
                         Spawn Command (for the Lobby)
              ********************************************** */
