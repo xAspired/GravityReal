@@ -154,6 +154,13 @@ public class Methods {
                     for (Player player : getServer().getOnlinePlayers()) {
                         //Take the return of the method about the generation of the 1st Map
                         Object[] firstMapObj = firstMapSetup();
+
+                        //Check if the return method about the 1st Map gave an exception
+                        if (firstMapObj == null) {
+                            cancel();
+                            return;
+                        }
+
                         UsefulMethods.teleportPlayer(player, (World) firstMapObj[0], (Double) firstMapObj[1], (Double) firstMapObj[2], (Double) firstMapObj[3], (Float) firstMapObj[4], (Float) firstMapObj[5]); //Teleport All
 
                         //Health Setup
