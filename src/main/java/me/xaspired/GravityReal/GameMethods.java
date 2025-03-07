@@ -2,9 +2,7 @@ package me.xaspired.GravityReal;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -14,7 +12,7 @@ import java.util.HashMap;
 import static org.bukkit.Bukkit.getServer;
 
 @SuppressWarnings({"deprecation", "ConstantConditions"})
-public class Methods {
+public class GameMethods {
     public enum GameStatus {
         NOTYETSTARTED,
         STARTEDCOUNTDOWN,
@@ -84,7 +82,7 @@ public class Methods {
             }
         }
         else {
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "There are too few maps to let the game starts. Check your 'maps-per-game' in config, or create new maps.");
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game starts. Check your 'maps-per-game' in config, or create new maps.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -106,7 +104,7 @@ public class Methods {
             //Create a new virtual world
             firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + indexMaps.get(0) + ".spawnpoint.world"));
         } catch (Exception e) {
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game couldn't start because there are some maps without spawnpoint. Check in the config and set it with /gravity setmapspawn <map>");
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game couldn't start because there are some maps without spawnpoint. Check in the config and set it with /gravity setmapspawn <map>");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -131,18 +129,24 @@ public class Methods {
         //Nested methods -> Call an actionbar about the initialized random maps
         actionbarMaps(initializeGameAndMaps());
 
+        //If for some reason Maps above are not correctly initialized and then also actionbar
+        //status will become NOTYETSTARTED again and then we should go outside this method
+        if (status == GameStatus.NOTYETSTARTED)
+            return;
+
         //Broadcasting that the minPlayers is satisfied
-        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Minimum number of players reached!");
-        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY + "...");
+        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players reached!");
+        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY + "...");
         new BukkitRunnable() {
             int countdownStarter = 10;
 
             public void run() {
-                Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + countdownStarter);
+
+                Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + countdownStarter);
 
                 //Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
-                    Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
                     cancel();
                 }
                 if (--countdownStarter < 0) {
@@ -161,11 +165,14 @@ public class Methods {
                             return;
                         }
 
-                        UsefulMethods.teleportPlayer(player, (World) firstMapObj[0], (Double) firstMapObj[1], (Double) firstMapObj[2], (Double) firstMapObj[3], (Float) firstMapObj[4], (Float) firstMapObj[5]); //Teleport All
+                        Location firstMap = new Location((World) firstMapObj[0], (Double) firstMapObj[1], (Double) firstMapObj[2], (Double) firstMapObj[3], (Float) firstMapObj[4], (Float) firstMapObj[5]);
 
-                        //Health Setup
+                        TeleportManager.teleportPlayer(player, firstMap); //Teleport All
+
+                        //Player Setup
                         player.setMaxHealth(6);
                         player.setHealthScale(6);
+                        player.setGameMode(GameMode.ADVENTURE);
 
                         Main.getInstance().scorePlayer[0] = null;
                         Main.getInstance().scorePlayer[1] = null;
@@ -188,6 +195,11 @@ public class Methods {
      ********************************************** */
     public static void actionbarMaps(StringBuilder nameMapsConcatenated) {
 
+        if (nameMapsConcatenated == null) {
+            status = GameStatus.NOTYETSTARTED;
+            return;
+        }
+
         //Sending to all players an actionbar that says which maps will be played
         for (Player player : getServer().getOnlinePlayers()) {
             new BukkitRunnable() {
@@ -207,7 +219,7 @@ public class Methods {
     public static void endGame(Player playerWin) {
         if (!(status == GameStatus.ENDING)) {
             status = GameStatus.ENDING;
-            Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
 
             new BukkitRunnable() {
                 int countdownStarter = 240;
@@ -217,19 +229,19 @@ public class Methods {
                         cancel();
 
                     if (countdownStarter == 240)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
                     else if (countdownStarter == 180)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
                     else if (countdownStarter == 120)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
                     else if (countdownStarter == 60)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
                     else if (countdownStarter == 3)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
                     else if (countdownStarter == 2)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
                     else if (countdownStarter == 1)
-                        Bukkit.broadcastMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
 
                     if (--countdownStarter < 0) {
                         for (Player player : getServer().getOnlinePlayers()) {

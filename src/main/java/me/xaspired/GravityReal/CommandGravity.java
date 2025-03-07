@@ -2,16 +2,13 @@ package me.xaspired.GravityReal;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.Set;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -29,32 +26,12 @@ public class CommandGravity implements CommandExecutor {
 
         //If the command doesn't have any arguments (is one and stop e.g /gravity, /setspawnlobby)
         if (args.length == 0) {
-        //@TODO: Fare un metodo per sto comando che si ripete anche in Main
             /* **********************************************
                         Spawn Command (for the Lobby)
              ********************************************** */
 
             if (command.getName().equalsIgnoreCase("spawn")) {
-
-                //If the spawn is not set
-                if (Objects.equals(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"), "0")) {
-                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn is not set!");
-                }
-                else {
-
-                    //Create a new virtual object named world, that names is the same as the one in the config
-                    World Lobby = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"));
-
-                    //Coords taken from the conf.yml file
-                    double x = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.x");
-                    double y = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.y");
-                    double z = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.z");
-                    double yaw = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.yaw");
-                    double pitch = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.pitch");
-                    player.teleport(new Location(Lobby, x, y, z, (float) yaw, (float) pitch));
-                }
-                return true;
-
+                TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
             }
 
             /* **********************************************
@@ -67,7 +44,7 @@ public class CommandGravity implements CommandExecutor {
 
                 // put values into map for A
                 playerMapTime.put(((Player) sender).getDisplayName(), ((Player) sender).getWorld().getName());
-                playerMapTime.put(((Player) sender).getDisplayName(), Methods.countdownReverse + "");
+                playerMapTime.put(((Player) sender).getDisplayName(), GameMethods.countdownReverse + "");
 
                 // get all the set of keys
                 Set<String> keys = playerMapTime.keySet();
@@ -80,7 +57,7 @@ public class CommandGravity implements CommandExecutor {
                 }
 
                 System.out.println(playerMapTime);
-                System.out.println("Countdown: " + Methods.countdownReverse);
+                System.out.println("Countdown: " + GameMethods.countdownReverse);
                 return true;
             }
 
@@ -118,7 +95,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name for your new map!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name for your new map!");
                 return true;
             }
             boolean isFor = false;
@@ -150,11 +127,11 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().saveConfig();
 
 
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " created!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " created!");
 
             }
             else {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map already exists!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map already exists!");
             }
 
             return true;
@@ -169,7 +146,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
             boolean isFor = false;
@@ -187,14 +164,14 @@ public class CommandGravity implements CommandExecutor {
                 player.getLocation().getWorld().setGameRuleValue("doImmediateRespawn", "true");
 
 
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 
                 //Set isFor to true if the name of the map already exists
                 isFor = true;
             }
 
             if (!isFor)
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
 
             return true;
         }
@@ -210,7 +187,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
 
@@ -218,11 +195,11 @@ public class CommandGravity implements CommandExecutor {
             try {
                 diffMap = args[2];
                 if (!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard"))) {
-                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
                     return true;
                 }
             } catch (Exception e) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
                 return true;
             }
 
@@ -236,18 +213,18 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().saveConfig();
 
                 if (diffMap.equalsIgnoreCase("easy"))
-                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.GREEN + "Easy" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.GREEN + "Easy" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
                 else if (diffMap.equalsIgnoreCase("medium"))
-                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.YELLOW + "Medium" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.YELLOW + "Medium" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
                 else
-                    player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Difficulty " + ChatColor.RED + "Hard" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.RED + "Hard" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 
                 //Set isFor to true if the name of the map already exists
                 isFor = true;
             }
 
             if (!isFor)
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
 
             return true;
         }
@@ -258,7 +235,7 @@ public class CommandGravity implements CommandExecutor {
 
         else if (args[0].equalsIgnoreCase("reload")) {
             Main.getInstance().reloadConfig();
-            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
+            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
             return true;
         }
 
@@ -277,9 +254,9 @@ public class CommandGravity implements CommandExecutor {
             }
 
             if (numberMaps == 0)
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "There is no map set yet");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There is no map set yet");
             else {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Here is the list of maps:");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Here is the list of maps:");
                 player.sendMessage(ChatColor.DARK_GRAY + "|| ");
             }
 
@@ -299,7 +276,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "You must declare a name of a map!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
             boolean isFor = false;
@@ -311,14 +288,14 @@ public class CommandGravity implements CommandExecutor {
                 Main.getInstance().saveConfig();
 
 
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted!");
 
                 //Set isFor to true if the name of the map already exists
                 isFor = true;
             }
 
             if (!isFor)
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "The map doesn't exist!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist!");
 
             return true;
         }
@@ -336,12 +313,12 @@ public class CommandGravity implements CommandExecutor {
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
             Main.getInstance().saveConfig();
-            player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Lobby Spawnpoint Set!");
+            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Lobby Spawnpoint Set!");
             return true;
         }
 
 
-        player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity " + ChatColor.DARK_GRAY + "| " + ChatColor.GRAY + "Incorrect Syntax! Type /gravity for help");
+        player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Incorrect Syntax! Type /gravity for help");
         return true;
     }
 }
