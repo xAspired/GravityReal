@@ -24,4 +24,4 @@ lobbyspawn:
     yaw: 0
     pitch: 0
 
-maps:
+maps: # Let maps be generated automatically and don't touch nothing

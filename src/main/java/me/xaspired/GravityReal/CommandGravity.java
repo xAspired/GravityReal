@@ -91,7 +91,7 @@ public class CommandGravity implements CommandExecutor {
         else if (args[0].equalsIgnoreCase("createmap")) {
             String nameMap;
 
-            //Check that player have wrote the name of the map
+            //Check that player has written the name of the map
             try {
                 nameMap = args[1];
             } catch (Exception e) {

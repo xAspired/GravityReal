@@ -13,21 +13,32 @@ import static org.bukkit.Bukkit.getServer;
 
 @SuppressWarnings({"deprecation", "ConstantConditions"})
 public class GameMethods {
+
+    /* **********************************************
+            Game Variables Declaration
+     ********************************************** */
     public enum GameStatus {
         NOTYETSTARTED,
         STARTEDCOUNTDOWN,
         STARTED,
         ENDING
     }
-    static GameStatus status = GameStatus.NOTYETSTARTED;
+
+    public enum PlayerStatus {
+        INGAME,
+        FINISHED
+    }
 
     //Timer
     public static boolean isTimerStarted = false;
     public static int countdownReverse = 0;
 
-    //Maps
+    //Maps and In-Game-Players Variables
     public static HashMap<String, Integer> mapsIndex = new HashMap<>();
     public static HashMap<Integer, String> indexMaps = new HashMap<>();
+    public static HashMap<Player, PlayerStatus> playerStatus = new HashMap<>();
+
+    static GameStatus status = GameStatus.NOTYETSTARTED;
 
 
     /* **********************************************
@@ -130,7 +141,7 @@ public class GameMethods {
         actionbarMaps(initializeGameAndMaps());
 
         //If for some reason Maps above are not correctly initialized and then also actionbar
-        //status will become NOTYETSTARTED again and then we should go outside this method
+        //status will become NOTYETSTARTED again, and then we should go outside this method
         if (status == GameStatus.NOTYETSTARTED)
             return;
 
@@ -173,13 +184,14 @@ public class GameMethods {
                         player.setMaxHealth(6);
                         player.setHealthScale(6);
                         player.setGameMode(GameMode.ADVENTURE);
+                        playerStatus.put(player, PlayerStatus.INGAME);
 
-                        Main.getInstance().scorePlayer[0] = null;
-                        Main.getInstance().scorePlayer[1] = null;
-                        Main.getInstance().scorePlayer[2] = null;
-                        Main.getInstance().scorePlayer[3] = null;
-                        Main.getInstance().scorePlayer[4] = null;
-                        Main.getInstance().createBoard(player); //Creation of the Board
+                        BoardManager.scorePlayer[0] = null;
+                        BoardManager.scorePlayer[1] = null;
+                        BoardManager.scorePlayer[2] = null;
+                        BoardManager.scorePlayer[3] = null;
+                        BoardManager.scorePlayer[4] = null;
+                        BoardManager.createBoard(player); //Creation of the Board
                         timerPlayers(); //Start board timer
 
                     }
@@ -228,26 +240,29 @@ public class GameMethods {
                     if (!(status == GameStatus.ENDING))
                         cancel();
 
-                    if (countdownStarter == 240)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
-                    else if (countdownStarter == 180)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
-                    else if (countdownStarter == 120)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
-                    else if (countdownStarter == 60)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
-                    else if (countdownStarter == 3)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
-                    else if (countdownStarter == 2)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
-                    else if (countdownStarter == 1)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                    // @TODO testare lo switch
+                    switch (countdownStarter) {
+                        case 240:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                        case 180:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                        case 120:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                        case 60:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                        case 3:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                        case 2:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                        case 1:
+                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                    }
 
                     if (--countdownStarter < 0) {
                         for (Player player : getServer().getOnlinePlayers()) {
                             player.performCommand("spawn");
                         }
-                        status = GameStatus.NOTYETSTARTED;
+                        UsefulMethods.resetGame();
                         cancel();
                     }
                 }
@@ -265,7 +280,7 @@ public class GameMethods {
             new BukkitRunnable() {
                 public void run() {
 
-                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time") || Bukkit.getOnlinePlayers().size() == 0) {
+                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time") || Bukkit.getOnlinePlayers().isEmpty()) {
                         cancel();
                     }
                 }

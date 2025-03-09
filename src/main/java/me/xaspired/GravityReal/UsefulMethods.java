@@ -25,4 +25,13 @@ public class UsefulMethods {
 
         return (strmin + ":" + strSec);
     }
+
+    /* **********************************************
+             Reinitialize Game
+    ********************************************** */
+    public static void resetGame() {
+        GameMethods.status = GameMethods.GameStatus.NOTYETSTARTED;
+        GameMethods.countdownReverse = 0;
+        GameMethods.isTimerStarted = false;
+    }
 }
