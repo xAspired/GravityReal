@@ -11,6 +11,7 @@
 # Copy of Configuration File
 # If something breaks, replace 'config.yml' with this one
 message-join: "&8|| &bGra&avity&7: Welcome to our minigame!" # Join Chat Message
+game-prefix: "&8|| &bGra&avity&7 &8| " #Prefix
 max-players: 10
 min-players: 2
 maps-per-game: 5 # Number of Maps for each game
