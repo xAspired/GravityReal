@@ -1,5 +1,7 @@
-package me.xaspired.GravityReal;
+package me.xaspired.GravityReal.Managers;
 
+import me.xaspired.GravityReal.GameMethods;
+import me.xaspired.GravityReal.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

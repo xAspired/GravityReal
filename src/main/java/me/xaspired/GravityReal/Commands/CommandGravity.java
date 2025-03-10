@@ -1,7 +1,11 @@
-package me.xaspired.GravityReal;
+package me.xaspired.GravityReal.Commands;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import me.xaspired.GravityReal.GameMethods;
+import me.xaspired.GravityReal.GlobalVariables;
+import me.xaspired.GravityReal.Main;
+import me.xaspired.GravityReal.Managers.TeleportManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -103,7 +107,7 @@ public class CommandGravity implements CommandExecutor {
 
             //If the name of the map already exists
             try {
-                if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+                if (Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
 
                     //Set isFor to true if the name of the map already exists
                     isFor = true;
@@ -152,7 +156,7 @@ public class CommandGravity implements CommandExecutor {
             boolean isFor = false;
 
             //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
 
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.world", player.getLocation().getWorld().getName());
                 Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.x", player.getLocation().getX());
@@ -207,7 +211,7 @@ public class CommandGravity implements CommandExecutor {
             boolean isFor = false;
 
             //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
 
                 Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", diffMap);
                 Main.getInstance().saveConfig();
@@ -248,7 +252,7 @@ public class CommandGravity implements CommandExecutor {
 
             //Check if there are maps in the config
             try {
-                numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
+                numberMaps = Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).size();
             } catch (Exception e) {
                 numberMaps = 0;
             }
@@ -261,7 +265,7 @@ public class CommandGravity implements CommandExecutor {
             }
 
             for (int i = 0; i < numberMaps; i++) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i + 1) + ChatColor.GRAY + ". " + ChatColor.AQUA + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[i]);
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i + 1) + ChatColor.GRAY + ". " + ChatColor.AQUA + Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).toArray()[i]);
             }
 
             return true;
@@ -282,7 +286,7 @@ public class CommandGravity implements CommandExecutor {
             boolean isFor = false;
 
             //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            if (Main.getInstance().getConfig().getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
 
                 Main.getInstance().getConfig().set("maps." + nameMap, null);
                 Main.getInstance().saveConfig();

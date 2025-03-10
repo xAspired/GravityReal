@@ -1,4 +1,4 @@
-package me.xaspired.GravityReal;
+package me.xaspired.GravityReal.Commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;

@@ -1,5 +1,7 @@
 package me.xaspired.GravityReal;
 
+import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.TeleportManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -228,46 +230,40 @@ public class GameMethods {
         }
     }
 
-    public static void endGame(Player playerWin) {
-        if (!(status == GameStatus.ENDING)) {
-            status = GameStatus.ENDING;
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
+    public static void endGame() {
+        status = GameStatus.ENDING;
 
-            new BukkitRunnable() {
-                int countdownStarter = 240;
+        new BukkitRunnable() {
+            int countdownStarter = 240;
 
-                public void run() {
-                    if (!(status == GameStatus.ENDING))
-                        cancel();
+            public void run() {
+                if (!(status == GameStatus.ENDING))
+                    cancel();
 
-                    // @TODO testare lo switch
-                    switch (countdownStarter) {
-                        case 240:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
-                        case 180:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
-                        case 120:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
-                        case 60:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
-                        case 3:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
-                        case 2:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
-                        case 1:
-                            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                if (countdownStarter == 240)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                else if (countdownStarter == 180)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                else if (countdownStarter == 120)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                else if (countdownStarter == 60)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                else if (countdownStarter == 3)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                else if (countdownStarter == 2)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                else if (countdownStarter == 1)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+
+                if (--countdownStarter < 0) {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        player.performCommand("spawn");
                     }
-
-                    if (--countdownStarter < 0) {
-                        for (Player player : getServer().getOnlinePlayers()) {
-                            player.performCommand("spawn");
-                        }
-                        UsefulMethods.resetGame();
-                        cancel();
-                    }
+                    UsefulMethods.resetGame();
+                    cancel();
                 }
-            }.runTaskTimer(Main.getInstance(), 20, 20);
-        }
+            }
+        }.runTaskTimer(Main.getInstance(), 20, 20);
     }
 
     public static void timerPlayers() {

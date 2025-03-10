@@ -1,5 +1,7 @@
-package me.xaspired.GravityReal;
+package me.xaspired.GravityReal.Managers;
 
+import me.xaspired.GravityReal.Main;
+import me.xaspired.GravityReal.UsefulMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -7,7 +9,7 @@ import org.bukkit.scoreboard.*;
 
 public class BoardManager {
 
-    static Player[] scorePlayer = {null, null, null, null, null};
+    public static Player[] scorePlayer = {null, null, null, null, null};
     static int[] scoreIndex = {0, 0, 0, 0, 0};
     public static void createBoard(Player player) {
 
@@ -104,7 +106,7 @@ public class BoardManager {
             }
             else {
                 // Check if player has finished
-                if (Main.playerMap.get(scorePlayer[i]) == Main.getInstance().config.getInt("maps-per-game")) {
+                if (Main.playerMap.get(scorePlayer[i]) == Main.getInstance().getConfig().getInt("maps-per-game")) {
                     int realpos = i+1;
                     // @TODO Testare lo switch
                     switch(realpos) {

@@ -1,5 +1,9 @@
 package me.xaspired.GravityReal;
 
+import me.xaspired.GravityReal.Commands.CommandGravity;
+import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
+import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.TeleportManager;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -142,22 +146,24 @@ public class Main extends JavaPlugin implements Listener {
 
                 // Check if the map of the player is equal to the last map
                 if (GameMethods.mapsIndex.get(player.getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1)) {
-                    GameMethods.endGame(player);
 
-                    //Everyone has finished
+                    // If everyone has finished
                     if (!GameMethods.playerStatus.containsValue(GameMethods.PlayerStatus.INGAME)) {
-                        event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0] + " §7with " + playerTime.get(BoardManager.scorePlayer[0]), 10, 80, 10);
+                        event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0].getName() + "§R§7 with " + playerTime.get(BoardManager.scorePlayer[0]) + "§7s ", 10, 80, 10);
                         UsefulMethods.resetGame();
+                    } else if (!(GameMethods.status == GameMethods.GameStatus.ENDING)) {
+                        GameMethods.endGame();
+                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + player.getName() + ChatColor.YELLOW + " finished the game!");
                     }
-                    else {
-                        // Teleport player to mainLobby after 0.5 seconds for a better optimization
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
-                            }
-                        }.runTaskLater(this, 1L);
-                    }
+
+                    // Teleport player to mainLobby after 0.5 seconds for a better optimization
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                        }
+                    }.runTaskLater(this, 1L);
+
 
                 }
 
