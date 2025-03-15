@@ -7,7 +7,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -48,54 +52,80 @@ public class GameMethods {
      ********************************************** */
     public static StringBuilder initializeGameAndMaps() {
         int numberMaps;
-
-        //Number of maps players will play in a Game (can be set in the config)
+        File mapsFolder = new File("maps/");
+        File[] mapsFiles = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
         StringBuilder nameMapsConcatenated = new StringBuilder();
 
-        //Check if the value of numberMaps is null (there aren't maps set in the config)
+        // Check if the value of numberMaps is null (there aren't maps set in the config)
         try {
-            //Number of Maps in the config
-            numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
+            // Number of Maps set
+            numberMaps = mapsFiles.length;
         } catch (Exception e) {
             numberMaps = 0;
         }
 
-        //Check if someone inserted a wrong value to 'maps-per-game' in config
-        //The code can't run if 'maps-per-game' are set to 5 but there are 3 maps set
-        if (numberMaps >= Main.getInstance().config.getInt("maps-per-game")) {
-            //Array based on the number of maps
-            ArrayList<Integer> tempNumberList = new ArrayList<>(numberMaps);
+        if (mapsFiles == null || mapsFiles.length == 0) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are no available maps. Please create new maps.");
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
+
+        int mapsPerGame = Main.getInstance().config.getInt("maps-per-game");
+
+        // Check if set maps are enough to let game starts
+        if (numberMaps >= mapsPerGame) {
+            // Creazione di una lista di indici disponibili per la randomizzazione
+            ArrayList<Integer> tempNumberList = new ArrayList<>();
             for (int i = 0; i < numberMaps; i++) {
                 tempNumberList.add(i);
             }
-            for (int count = 0; count < Main.getInstance().config.getInt("maps-per-game"); count++)
-            {
 
-                //Randomized map
-                String nameMapFor = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
+            for (int count = 0; count < mapsPerGame && !tempNumberList.isEmpty(); count++) {
+                // Seleziona un indice casuale e rimuovilo dalla lista
+                int randomIndex = tempNumberList.remove((int) (Math.random() * tempNumberList.size()));
+
+                // Assicuriamoci che l'indice sia valido
+                if (randomIndex < 0 || randomIndex >= mapsFiles.length) {
+                    continue; // Salta se l'indice non è valido
+                }
+
+                // Ottieni il nome della mappa senza l'estensione .json
+                String nameMapFor = mapsFiles[randomIndex].getName().replace(".json", "");
+
                 mapsIndex.put(nameMapFor, count);
                 indexMaps.put(count, nameMapFor);
 
-                //Different Color for Different Difficulty
-                //Try and catch for those who wrongly remove manually the "difficulty" string from config file
+                // Determina il colore basato sulla difficoltà (se disponibile nel file)
+                File mapFile = new File("maps/" + nameMapFor + ".json");
+                ChatColor mapColor = ChatColor.WHITE; // Default
+
                 try {
-                    if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("easy"))
-                        nameMapsConcatenated.append(ChatColor.GREEN).append(indexMaps.get(count));
-                    else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("medium"))
-                        nameMapsConcatenated.append(ChatColor.YELLOW).append(indexMaps.get(count));
-                    else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("hard"))
-                        nameMapsConcatenated.append(ChatColor.RED).append(indexMaps.get(count));
+                    String content = new String(Files.readAllBytes(Paths.get(mapFile.getPath())));
+                    JSONObject mapData = new JSONObject(content);
+
+                    String difficulty = mapData.optString("difficulty", "unknown").toLowerCase();
+                    mapColor = switch (difficulty) {
+                        case "easy" -> ChatColor.GREEN;
+                        case "medium" -> ChatColor.YELLOW;
+                        case "hard" -> ChatColor.RED;
+                        default -> mapColor;
+                    };
+
                 } catch (Exception e) {
-                    nameMapsConcatenated.append(ChatColor.WHITE).append(indexMaps.get(count));
+                    Bukkit.getLogger().warning("Error reading map difficulty for " + nameMapFor);
                 }
 
-                //Settings to don't add the minus at the end of the StringBuilder
-                if (count < Main.getInstance().config.getInt("maps-per-game") - 1)
+                // Aggiunge il nome della mappa con il colore corrispondente
+                nameMapsConcatenated.append(mapColor).append(nameMapFor);
+
+                // Aggiunge il separatore "-" solo se non è l'ultima mappa della lista
+                if (count < mapsPerGame - 1) {
                     nameMapsConcatenated.append(ChatColor.WHITE).append(" - ");
+                }
             }
-        }
-        else {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game starts. Check your 'maps-per-game' in config, or create new maps.");
+
+        } else {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game start. Check your 'maps-per-game' setting or create new maps.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -110,26 +140,50 @@ public class GameMethods {
            Create the Object for the First Map
      ********************************************** */
     public static Object[] firstMapSetup() {
-        World firstMap;
-
-        //If some spanwpoints are not set:
-        try {
-            //Create a new virtual world
-            firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + indexMaps.get(0) + ".spawnpoint.world"));
-        } catch (Exception e) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game couldn't start because there are some maps without spawnpoint. Check in the config and set it with /gravity setmapspawn <map>");
+        if (indexMaps.isEmpty() || indexMaps.get(0) == null) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
 
-        //Coords taken from the conf.yml file
-        double x = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.x");
-        double y = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.y");
-        double z = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.z");
-        float yaw = (float) Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.yaw");
-        float pitch = (float) Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.pitch");
+        String firstMapName = indexMaps.get(0);
+        File mapFile = new File("maps/" + firstMapName + ".json");
 
-        return new Object[] {firstMap, x, y, z, yaw, pitch};
+        if (!mapFile.exists()) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
+
+        try {
+            // Legge il file JSON della mappa
+            String content = new String(Files.readAllBytes(Paths.get(mapFile.getPath())));
+            JSONObject mapData = new JSONObject(content);
+
+            // Ottieni il mondo della mappa
+            World firstMap = Bukkit.getServer().getWorld(mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world"));
+            if (firstMap == null) {
+                Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
+                status = GameStatus.NOTYETSTARTED;
+                return null;
+            }
+
+            // Recupera le coordinate dello spawnpoint 0
+            JSONObject spawnpoint = mapData.getJSONArray("spawnpoints").getJSONObject(0);
+            double x = spawnpoint.getDouble("x");
+            double y = spawnpoint.getDouble("y");
+            double z = spawnpoint.getDouble("z");
+            float yaw = (float) spawnpoint.getDouble("yaw");
+            float pitch = (float) spawnpoint.getDouble("pitch");
+
+            return new Object[]{firstMap, x, y, z, yaw, pitch};
+
+        } catch (Exception e) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
+            e.printStackTrace();
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
     }
 
 
