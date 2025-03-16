@@ -14,6 +14,7 @@ public class BoardManager {
     public static void createBoard(Player player) {
 
         ScoreboardManager manager = Bukkit.getScoreboardManager();
+        assert manager != null;
         Scoreboard board = manager.getNewScoreboard();
         Objective obj = board.registerNewObjective("GravityScore", "forDummy", ChatColor.translateAlternateColorCodes('&', "&a&lGra&b&lvity"));
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -33,9 +34,9 @@ public class BoardManager {
         for (Player playerInFor : Main.getInstance().getServer().getOnlinePlayers()) {
 
             // Check if the player pass 1st map(index=0)
-            Integer playerMapValue = Main.playerMap.get(playerInFor); // Retrieve the value
+            int playerMapValue = Main.getInstance().inGamePlayers.get(playerInFor).getActualMap(); // Retrieve the value
 
-            if (playerMapValue == null || playerMapValue < 1) {
+            if (playerMapValue < 1) {
                 continue; // If null or less than 1, skip this player
             }
 
@@ -68,7 +69,7 @@ public class BoardManager {
                 boolean swapNeeded = false;
 
                 // Same index, check time
-                if (scoreIndex[j + 1] == scoreIndex[j] && Main.playerTime.get(scorePlayer[j + 1]) < Main.playerTime.get(scorePlayer[j])) {
+                if (scoreIndex[j + 1] == scoreIndex[j] && Main.getInstance().inGamePlayers.get(scorePlayer[j + 1]).getGameTime() < Main.getInstance().inGamePlayers.get(scorePlayer[j]).getGameTime()) {
                     swapNeeded = true;
                 }
 
@@ -96,8 +97,8 @@ public class BoardManager {
         }
 
 
-        // Set up scoreboard 5 rows @TODO fix variable
-        Score scores[] = new Score[5];
+        // Set up scoreboard 5 rows
+        Score[] scores = new Score[5]; //@TODO check funzionalità
         for (int i = 0; i < 5; ++i) {
 
             // Check if player is null (not arrived)
@@ -106,18 +107,18 @@ public class BoardManager {
             }
             else {
                 // Check if player has finished
-                if (Main.playerMap.get(scorePlayer[i]) == Main.getInstance().getConfig().getInt("maps-per-game")) {
+                if (Main.getInstance().inGamePlayers.get(scorePlayer[i]).getActualMap() == Main.getInstance().getConfig().getInt("maps-per-game")) {
                     int realpos = i+1;
                     // @TODO Testare lo switch
                     switch(realpos) {
                         case 1:
-                            scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.playerTime.get(scorePlayer[i])));
+                            scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
                         case 2:
-                            scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.playerTime.get(scorePlayer[i])));
+                            scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
                         case 3:
-                            scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.playerTime.get(scorePlayer[i])));
+                            scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
                         default:
-                            scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + UsefulMethods.returnTimeFormatted(Main.playerTime.get(scorePlayer[i])));
+                            scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
                     }
                 }
                 else {

@@ -19,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -32,9 +31,7 @@ public class Main extends JavaPlugin implements Listener {
     /* **********************************************
                   Board Variables
     ********************************************** */
-    public static HashMap<Player, Integer> playerMap = new HashMap<>();
-    public static HashMap<Player, Integer> playerTime = new HashMap<>();
-    HashMap<Player, GravityPlayer> inGamePlayers = new HashMap<>();
+    public HashMap<Player, GravityPlayer> inGamePlayers = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -86,7 +83,7 @@ public class Main extends JavaPlugin implements Listener {
         int maxPlayers = config.getInt("max-players");
 
         Player player = event.getPlayer();
-        GravityPlayer playerObj = new GravityPlayer(player, "", "", 0, 0, 0);
+        GravityPlayer playerObj = new GravityPlayer(player, GameMethods.PlayerStatus.NONE, 0, 0, 0, 0, 0);
         inGamePlayers.put(player, playerObj);
 
         //Remove basic "Player joined the game" message
@@ -105,7 +102,8 @@ public class Main extends JavaPlugin implements Listener {
         //If the min of players is the one inserted in the config
         if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED || GameMethods.status == GameMethods.GameStatus.STARTEDCOUNTDOWN)) {
             GameMethods.startGameCountdown();
-            playerMap.put(event.getPlayer(), 0);
+            playerObj.setActualMap(0);
+            inGamePlayers.put(player, playerObj);
         }
 
     }
@@ -115,10 +113,6 @@ public class Main extends JavaPlugin implements Listener {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
 
-        // @TODO invece di impostarli a 0, rimuoverli direttamente per liberare anche memoria
-        playerMap.put(event.getPlayer(), 0);
-        playerTime.put(event.getPlayer(), 0);
-
         //If there is no one on the Server, Game will be reset
         if (Bukkit.getOnlinePlayers().size() <= 1)
             UsefulMethods.resetGame();
@@ -127,6 +121,15 @@ public class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         event.setDeathMessage(null);
+
+        // Check if the player is playing
+        if (inGamePlayers.get(event.getEntity().getPlayer()).getStatus() == GameMethods.PlayerStatus.INGAME) {
+
+            // Increment his map fails by 1
+            GravityPlayer playerObj = inGamePlayers.get(event.getEntity().getPlayer());
+            playerObj.setFailsMap(playerObj.getFailsMap() + 1);
+            inGamePlayers.put(event.getEntity().getPlayer(), playerObj);
+        }
     }
 
 
@@ -137,13 +140,12 @@ public class Main extends JavaPlugin implements Listener {
             if (event.getTo().getBlock().getType() == Material.NETHER_PORTAL) {
                 event.setCancelled(true);
 
-                // Check if the player exists in playerMap and increment its value
-                Integer currentValue = playerMap.get(player);
-                if (currentValue == null) {
-                    currentValue = 0; // Set a default value if the player is not in the map
-                }
-                playerMap.put(player, currentValue + 1);
-                playerTime.put(player, GameMethods.countdownReverse);
+                // Set next map and update player time
+                GravityPlayer playerObj = inGamePlayers.get(event.getPlayer());
+                playerObj.setActualMap(playerObj.getActualMap() + 1);
+                playerObj.setGameTime(GameMethods.countdownReverse);
+                inGamePlayers.put(event.getPlayer(), playerObj);
+
 
                 for (Player betweenAllPlayer : getServer().getOnlinePlayers()) {
                     BoardManager.createBoard(betweenAllPlayer);
@@ -153,8 +155,8 @@ public class Main extends JavaPlugin implements Listener {
                 if (GameMethods.mapsIndex.get(player.getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1)) {
 
                     // If everyone has finished
-                    if (!GameMethods.playerStatus.containsValue(GameMethods.PlayerStatus.INGAME)) {
-                        event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0].getName() + "§R§7 with " + playerTime.get(BoardManager.scorePlayer[0]) + "§7s ", 10, 80, 10);
+                    if (inGamePlayers.values().stream().noneMatch(p -> p.getStatus().equals(GameMethods.PlayerStatus.INGAME))) {
+                        event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0].getName() + "§R§7 with " + inGamePlayers.get(BoardManager.scorePlayer[0]).getGameTime() + "§7s ", 10, 80, 10);
                         UsefulMethods.resetGame();
                     } else if (!(GameMethods.status == GameMethods.GameStatus.ENDING)) {
                         GameMethods.endGame();
@@ -174,7 +176,10 @@ public class Main extends JavaPlugin implements Listener {
 
                 // Verify that the result of the next map is not null
                 else if (!(GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)).isEmpty())) {
-                    GameMethods.playerStatus.put(player, GameMethods.PlayerStatus.FINISHED);
+
+                    // Set player status and update the list
+                    playerObj.setStatus(GameMethods.PlayerStatus.FINISHED);
+                    inGamePlayers.put(event.getPlayer(), playerObj);
 
                     new BukkitRunnable() { // Teleport player to nextMap after 0.5 seconds for a better optimization
                         @Override

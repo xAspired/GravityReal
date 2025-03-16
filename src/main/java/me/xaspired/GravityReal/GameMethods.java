@@ -32,6 +32,7 @@ public class GameMethods {
     }
 
     public enum PlayerStatus {
+        NONE,
         INGAME,
         FINISHED
     }
@@ -43,7 +44,6 @@ public class GameMethods {
     //Maps and In-Game-Players Variables
     public static HashMap<String, Integer> mapsIndex = new HashMap<>();
     public static HashMap<Integer, String> indexMaps = new HashMap<>();
-    public static HashMap<Player, PlayerStatus> playerStatus = new HashMap<>();
 
     static GameStatus status = GameStatus.NOTYETSTARTED;
 
@@ -241,7 +241,11 @@ public class GameMethods {
                         player.setMaxHealth(6);
                         player.setHealthScale(6);
                         player.setGameMode(GameMode.ADVENTURE);
-                        playerStatus.put(player, PlayerStatus.INGAME);
+
+                        // Update Player status
+                        GravityPlayer playerObj = Main.getInstance().inGamePlayers.get(player);
+                        playerObj.setStatus(PlayerStatus.INGAME);
+                        Main.getInstance().inGamePlayers.put(player, playerObj);
 
                         BoardManager.scorePlayer[0] = null;
                         BoardManager.scorePlayer[1] = null;

@@ -3,9 +3,6 @@ package me.xaspired.GravityReal;
 
 import org.bukkit.Bukkit;
 
-import java.io.File;
-
-
 public class UsefulMethods {
 
     /* **********************************************
@@ -35,5 +32,7 @@ public class UsefulMethods {
         GameMethods.status = GameMethods.GameStatus.NOTYETSTARTED;
         GameMethods.countdownReverse = 0;
         GameMethods.isTimerStarted = false;
+
+        Main.getInstance().inGamePlayers.clear();
     }
 }
