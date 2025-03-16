@@ -107,7 +107,7 @@ public class CommandGravity implements CommandExecutor {
             String nameMap;
 
             //Create the maps directory
-            File directory = new File("maps");
+            File directory = new File("plugins/GravityReal/maps");
             if (!directory.exists())
                 directory.mkdir();
 
@@ -119,7 +119,7 @@ public class CommandGravity implements CommandExecutor {
                 return true;
             }
 
-            String fileName = "maps/" + nameMap + ".json";
+            String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
             File fileMap = new File(fileName);
 
             // If the name of the file's map already exists
@@ -146,8 +146,6 @@ public class CommandGravity implements CommandExecutor {
                 System.out.println("Errore durante la scrittura nel file: " + e.getMessage());
             }
 
-
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " created!");
             return true;
         }
 
@@ -156,8 +154,8 @@ public class CommandGravity implements CommandExecutor {
         ********************************************** */
         else if (args[0].equalsIgnoreCase("setmapspawn")) {
 
-            // Arguments < 4 so there isn't any spawnIndex set
-            if (args.length < 4) {
+            // Arguments < 3 so there isn't any spawnIndex set
+            if (args.length < 3) {
                 player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Usage: /gravity setmapspawn <mapname> <spawnIndex>");
                 return true;
             }
@@ -171,11 +169,11 @@ public class CommandGravity implements CommandExecutor {
                 spawnIndex = Integer.parseInt(args[2]);
 
                 // It must be positive
-                if (spawnIndex < 0) {
+                if (spawnIndex < 1) {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Invalid spawn index! Must be a non-negative integer.");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Invalid spawn index! Must be higher than 0.");
                 return true;
             }
 
@@ -208,11 +206,11 @@ public class CommandGravity implements CommandExecutor {
                     return true;
                 }
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [" + ChatColor.GREEN + "EASY" + ChatColor.GRAY + " - " + ChatColor.YELLOW + "MEDIUM" + ChatColor.GRAY + " - " + ChatColor.RED + "HARD" + ChatColor.GRAY + "]!");
                 return true;
             }
 
-            String fileName = "maps/" + nameMap + ".json";
+            String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
             File fileMap = new File(fileName);
 
             if (!fileMap.exists()) {
@@ -258,7 +256,7 @@ public class CommandGravity implements CommandExecutor {
                    /gravity listmaps Command
         ********************************************** */
         else if (args[0].equalsIgnoreCase("listmaps")) {
-            File mapsFolder = new File("maps/");
+            File mapsFolder = new File("plugins/GravityReal/maps/");
             File[] files = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
 
             if (files == null || files.length == 0) {
@@ -290,7 +288,7 @@ public class CommandGravity implements CommandExecutor {
                 return true;
             }
 
-            File mapFile = new File("maps/" + nameMap + ".json");
+            File mapFile = new File("plugins/GravityReal/maps/" + nameMap + ".json");
 
             if (!mapFile.exists()) {
                 player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " does not exist!");

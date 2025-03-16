@@ -48,7 +48,7 @@ public class MapsManager {
             Set Spawn for Each Given Index
     ********************************************** */
     public static boolean setMapSpawn(String nameMap, int spawnIndex, Player player) {
-        String fileName = "maps/" + nameMap + ".json";
+        String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
         File fileMap = new File(fileName);
 
         if (!fileMap.exists()) {
@@ -69,12 +69,12 @@ public class MapsManager {
             JSONArray spawnpoints = mapData.optJSONArray("spawnpoints");
             int configMaxPlayers = mapData.getInt("playersNumber");
 
-            if (spawnpoints == null || spawnIndex >= configMaxPlayers) {
+            if (spawnpoints == null || spawnIndex > configMaxPlayers) {
                 player.sendMessage(ChatColor.RED + "Invalid spawn index!");
                 return false;
             }
 
-            JSONObject spawnpoint = spawnpoints.getJSONObject(spawnIndex);
+            JSONObject spawnpoint = spawnpoints.getJSONObject(spawnIndex - 1);
             spawnpoint.put("world", Objects.requireNonNull(player.getLocation().getWorld()).getName());
             spawnpoint.put("x", player.getLocation().getX());
             spawnpoint.put("y", player.getLocation().getY());
@@ -82,7 +82,7 @@ public class MapsManager {
             spawnpoint.put("pitch", player.getLocation().getPitch());
             spawnpoint.put("yaw", player.getLocation().getYaw());
 
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Spawn point " + spawnIndex + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Spawn point " + spawnIndex + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set! " + spawnIndex + "/" + configMaxPlayers);
 
             // Check if every spawnpoint are set
             if (allSpawnsSet(spawnpoints, configMaxPlayers)) {
@@ -114,7 +114,7 @@ public class MapsManager {
             Save All Map's Spawnpoints to File
     ********************************************** */
     private static void saveMapToFile(String nameMap) {
-        String fileName = "maps/" + nameMap + ".json";
+        String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
 
         // If the map is still in queue for being finished
         if (pendingMapUpdates.containsKey(nameMap)) {

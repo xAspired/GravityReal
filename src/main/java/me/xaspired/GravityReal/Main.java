@@ -4,6 +4,7 @@ import me.xaspired.GravityReal.Commands.CommandGravity;
 import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
 import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
+import me.xaspired.GravityReal.Objects.GravityPlayer;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -18,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -32,6 +34,7 @@ public class Main extends JavaPlugin implements Listener {
     ********************************************** */
     public static HashMap<Player, Integer> playerMap = new HashMap<>();
     public static HashMap<Player, Integer> playerTime = new HashMap<>();
+    HashMap<Player, GravityPlayer> inGamePlayers = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -83,6 +86,8 @@ public class Main extends JavaPlugin implements Listener {
         int maxPlayers = config.getInt("max-players");
 
         Player player = event.getPlayer();
+        GravityPlayer playerObj = new GravityPlayer(player, "", "", 0, 0, 0);
+        inGamePlayers.put(player, playerObj);
 
         //Remove basic "Player joined the game" message
         event.setJoinMessage(null);

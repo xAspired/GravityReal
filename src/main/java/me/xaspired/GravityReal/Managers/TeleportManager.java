@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class TeleportManager {
     //@TODO Add Check if Every Locations Exist
     /* **********************************************
@@ -21,7 +23,8 @@ public class TeleportManager {
     ********************************************** */
     public static Location getLobbySpawn() {
             //Create a new virtual object named world, that names is the same as the one in the config
-            World Lobby = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world"));
+            World Lobby = Bukkit.getServer().getWorld(Objects.requireNonNull(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world")));
+            assert Lobby != null;
             Lobby.setPVP(false);
 
             //Coords taken from the conf.yml file
@@ -37,7 +40,8 @@ public class TeleportManager {
     /* **********************************************
          Spawn -current- Map Teleport (on Death)
     ********************************************** */
-    public static Location getSpawnMap(Player player) {
+    public static Location getSpawnMap(Player player) { // @TODO: Creare il multimap e determinare che index è il player per portarlo in quello spawn
+
         World map = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.world"));
         double x = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.x");
         double y = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.y");

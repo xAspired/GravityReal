@@ -2,6 +2,7 @@ package me.xaspired.GravityReal;
 
 import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
+import me.xaspired.GravityReal.Objects.GravityPlayer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -52,7 +53,7 @@ public class GameMethods {
      ********************************************** */
     public static StringBuilder initializeGameAndMaps() {
         int numberMaps;
-        File mapsFolder = new File("maps/");
+        File mapsFolder = new File("plugins/GravityReal/maps/");
         File[] mapsFiles = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
         StringBuilder nameMapsConcatenated = new StringBuilder();
 
@@ -74,29 +75,29 @@ public class GameMethods {
 
         // Check if set maps are enough to let game starts
         if (numberMaps >= mapsPerGame) {
-            // Creazione di una lista di indici disponibili per la randomizzazione
+            // Creation of index array for the generation of the random maps
             ArrayList<Integer> tempNumberList = new ArrayList<>();
             for (int i = 0; i < numberMaps; i++) {
                 tempNumberList.add(i);
             }
 
             for (int count = 0; count < mapsPerGame && !tempNumberList.isEmpty(); count++) {
-                // Seleziona un indice casuale e rimuovilo dalla lista
+                // Choose random index and remove it from the list
                 int randomIndex = tempNumberList.remove((int) (Math.random() * tempNumberList.size()));
 
-                // Assicuriamoci che l'indice sia valido
+                // Verify the index is valid
                 if (randomIndex < 0 || randomIndex >= mapsFiles.length) {
                     continue; // Salta se l'indice non è valido
                 }
 
-                // Ottieni il nome della mappa senza l'estensione .json
+                // Get map's name without .json extension
                 String nameMapFor = mapsFiles[randomIndex].getName().replace(".json", "");
 
                 mapsIndex.put(nameMapFor, count);
                 indexMaps.put(count, nameMapFor);
 
-                // Determina il colore basato sulla difficoltà (se disponibile nel file)
-                File mapFile = new File("maps/" + nameMapFor + ".json");
+                // Choose color according the difficulty written on file
+                File mapFile = new File("plugins/GravityReal/maps/" + nameMapFor + ".json");
                 ChatColor mapColor = ChatColor.WHITE; // Default
 
                 try {
@@ -115,10 +116,10 @@ public class GameMethods {
                     Bukkit.getLogger().warning("Error reading map difficulty for " + nameMapFor);
                 }
 
-                // Aggiunge il nome della mappa con il colore corrispondente
+                // Add map with its color
                 nameMapsConcatenated.append(mapColor).append(nameMapFor);
 
-                // Aggiunge il separatore "-" solo se non è l'ultima mappa della lista
+                // Add "-" only if the map it's the last one of the list
                 if (count < mapsPerGame - 1) {
                     nameMapsConcatenated.append(ChatColor.WHITE).append(" - ");
                 }
@@ -147,7 +148,7 @@ public class GameMethods {
         }
 
         String firstMapName = indexMaps.get(0);
-        File mapFile = new File("maps/" + firstMapName + ".json");
+        File mapFile = new File("plugins/GravityReal/maps/" + firstMapName + ".json");
 
         if (!mapFile.exists()) {
             Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
@@ -156,11 +157,11 @@ public class GameMethods {
         }
 
         try {
-            // Legge il file JSON della mappa
+            // Get the JSON about the map
             String content = new String(Files.readAllBytes(Paths.get(mapFile.getPath())));
             JSONObject mapData = new JSONObject(content);
 
-            // Ottieni il mondo della mappa
+            // Get world first map
             World firstMap = Bukkit.getServer().getWorld(mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world"));
             if (firstMap == null) {
                 Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
@@ -168,7 +169,7 @@ public class GameMethods {
                 return null;
             }
 
-            // Recupera le coordinate dello spawnpoint 0
+            // Get coords of the first map - @TODO: Credo sia sbagliato
             JSONObject spawnpoint = mapData.getJSONArray("spawnpoints").getJSONObject(0);
             double x = spawnpoint.getDouble("x");
             double y = spawnpoint.getDouble("y");
@@ -211,7 +212,7 @@ public class GameMethods {
 
                 Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + countdownStarter);
 
-                //Countdown stopped if no minimum player online is more satisfied
+                // Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
                     Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
                     cancel();
@@ -223,10 +224,10 @@ public class GameMethods {
                             Teleport All Players to First Map
                     ********************************************** */
                     for (Player player : getServer().getOnlinePlayers()) {
-                        //Take the return of the method about the generation of the 1st Map
+                        // Take the return of the method about the generation of the 1st Map
                         Object[] firstMapObj = firstMapSetup();
 
-                        //Check if the return method about the 1st Map gave an exception
+                        // Check if the return method about the 1st Map gave an exception
                         if (firstMapObj == null) {
                             cancel();
                             return;
@@ -236,7 +237,7 @@ public class GameMethods {
 
                         TeleportManager.teleportPlayer(player, firstMap); //Teleport All
 
-                        //Player Setup
+                        // Player Setup
                         player.setMaxHealth(6);
                         player.setHealthScale(6);
                         player.setGameMode(GameMode.ADVENTURE);
@@ -247,8 +248,8 @@ public class GameMethods {
                         BoardManager.scorePlayer[2] = null;
                         BoardManager.scorePlayer[3] = null;
                         BoardManager.scorePlayer[4] = null;
-                        BoardManager.createBoard(player); //Creation of the Board
-                        timerPlayers(); //Start board timer
+                        BoardManager.createBoard(player); // Creation of the Board
+                        timerPlayers(); // Start board timer
 
                     }
                     cancel();
