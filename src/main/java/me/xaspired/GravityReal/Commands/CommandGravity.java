@@ -7,29 +7,24 @@ import me.xaspired.GravityReal.GlobalVariables;
 import me.xaspired.GravityReal.Main;
 import me.xaspired.GravityReal.Managers.MapsManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
-import me.xaspired.GravityReal.UsefulMethods;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.Set;
 
 
 @SuppressWarnings("ConstantConditions")
 public class CommandGravity implements CommandExecutor {
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 

@@ -3,6 +3,7 @@ package me.xaspired.GravityReal.Objects;
 import me.xaspired.GravityReal.GameMethods;
 import org.bukkit.entity.Player;
 
+// @TODO: Reperire le info del player da un db o da un file custom (coins, failsTotal)
 public class GravityPlayer {
     private Player player;
     private GameMethods.PlayerStatus status;

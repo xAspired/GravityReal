@@ -1,12 +1,19 @@
 package me.xaspired.GravityReal.Managers;
 
 import me.xaspired.GravityReal.GameMethods;
+import me.xaspired.GravityReal.GlobalVariables;
 import me.xaspired.GravityReal.Main;
+import me.xaspired.GravityReal.UsefulMethods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 public class TeleportManager {
@@ -40,32 +47,72 @@ public class TeleportManager {
     /* **********************************************
          Spawn -current- Map Teleport (on Death)
     ********************************************** */
-    public static Location getSpawnMap(Player player) { // @TODO: Creare il multimap e determinare che index è il player per portarlo in quello spawn
-
-        World map = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.world"));
-        double x = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.x");
-        double y = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.y");
-        double z = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.z");
-        double yaw = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.yaw");
-        double pitch = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get(GameMethods.mapsIndex.get(player.getWorld().getName())) + ".spawnpoint.pitch");
-        map.setPVP(false);
-
-        return new Location(map, x, y, z, (float) yaw, (float) pitch);
+    public static Location getSpawnMap(Player player) {
+        return getMapSpawn(player, Main.getInstance().inGamePlayers.get(player).getActualMap());
     }
 
     /* **********************************************
                 Get Next Spawn Map
     ********************************************** */
-
     public static Location getNextSpawnMap(Player player) {
-        World map = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.world"));
-        double x = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.x");
-        double y = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.y");
-        double z = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.z");
-        double yaw = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.yaw");
-        double pitch = Main.getInstance().getConfig().getDouble("maps." + GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)) + ".spawnpoint.pitch");
-        map.setPVP(false);
+        return getMapSpawn(player, Main.getInstance().inGamePlayers.get(player).getActualMap() + 1);
+    }
 
-        return new Location(map, x, y, z, (float) yaw, (float) pitch);
+    /* **********************************************
+                Common Spawn Method
+    ********************************************** */
+    //@TODO: Check su dove vengono stampati sti errori (console o game?)
+    private static Location getMapSpawn(Player player, int mapIndex) {
+        String mapName = GameMethods.indexMaps.get(mapIndex);
+        String fileName = "plugins/GravityReal/maps/" + mapName + ".json";
+        File fileMap = new File(fileName);
+
+        // If the file doesn't exist
+        if (!fileMap.exists()) {
+            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "There was a problem finding " + mapName + " file.");
+            return null;
+        }
+
+        try {
+            // Read JSON file
+            String content = new String(Files.readAllBytes(Paths.get(fileMap.getPath())));
+            JSONObject mapData = new JSONObject(content);
+
+            // If "INGAME" players are > of map spawnpoints (playersNumber)
+            if (mapData.getInt("playersNumber") < Main.getInstance().inGamePlayers.values().stream().filter(p -> p.getStatus().equals(GameMethods.PlayerStatus.INGAME)).count()) {
+                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Can't properly check spawnpoints because "
+                        + mapName + "'s player number is lower than players who are actually playing.");
+                return null;
+            }
+
+            // Get spawnpoints
+            JSONArray spawnPoints = mapData.optJSONArray("spawnpoints");
+            if (spawnPoints == null || spawnPoints.isEmpty()) {
+                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "No spawnpoints found in " + mapName);
+                return null;
+            }
+
+            // Get player spawn index
+            int playerIndex = UsefulMethods.getInGamePlayerIndex(player);
+            if (playerIndex >= spawnPoints.length()) {
+                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Player index out of range in " + mapName + " spawnpoints.");
+                return null;
+            }
+
+            JSONObject spawnData = spawnPoints.getJSONObject(playerIndex);
+            World world = Bukkit.getServer().getWorld(spawnData.getString("world"));
+            double x = spawnData.getDouble("x");
+            double y = spawnData.getDouble("y");
+            double z = spawnData.getDouble("z");
+            float yaw = (float) spawnData.getDouble("yaw");
+            float pitch = (float) spawnData.getDouble("pitch");
+
+            return new Location(world, x, y, z, yaw, pitch);
+
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Error loading map " + mapName + ": " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 }

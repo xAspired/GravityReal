@@ -10,7 +10,7 @@
 
 # Default Configuration File
 message-join: "&7Welcome to our minigame!" # Join Chat Message
-game-prefix: "&8|| &bGra&avity&7 &8| " #Prefix
+game-prefix: "&8|| &bGra&avity&7 &8| &R" #Prefix
 max-players: 10
 min-players: 2
 maps-per-game: 5 # Number of Maps for each game

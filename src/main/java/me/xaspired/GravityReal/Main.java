@@ -5,6 +5,7 @@ import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
 import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
+import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -92,7 +93,7 @@ public class Main extends JavaPlugin implements Listener {
         //Teleport player to Lobby Spawn
         TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
 
-        //Send the custom message write in the config in "message-join"
+        //Send the custom message written in config under "message-join"
         event.getPlayer().sendMessage(GlobalVariables.pluginPrefix + GlobalVariables.joinMessage);
         event.getPlayer().sendTitle("§fWelcome to §bGra§avity", "§fYou are now in §e§nqueue", 10, 80, 10);
 
@@ -146,7 +147,7 @@ public class Main extends JavaPlugin implements Listener {
                 playerObj.setGameTime(GameMethods.countdownReverse);
                 inGamePlayers.put(event.getPlayer(), playerObj);
 
-
+                // Create board for all players inside the server
                 for (Player betweenAllPlayer : getServer().getOnlinePlayers()) {
                     BoardManager.createBoard(betweenAllPlayer);
                 }
@@ -181,6 +182,15 @@ public class Main extends JavaPlugin implements Listener {
                     playerObj.setStatus(GameMethods.PlayerStatus.FINISHED);
                     inGamePlayers.put(event.getPlayer(), playerObj);
 
+                    Location placeToTeleport = TeleportManager.getNextSpawnMap(player);
+
+                    // If something went wrong for some reason
+                    if (placeToTeleport == null) {
+                        // @TODO: Probabilmente non va - testare sto messaggio
+                        player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
+                        return;
+                    }
+
                     new BukkitRunnable() { // Teleport player to nextMap after 0.5 seconds for a better optimization
                         @Override
                         public void run() {
@@ -203,12 +213,17 @@ public class Main extends JavaPlugin implements Listener {
         else
             placeToTeleport = TeleportManager.getSpawnMap(player);
 
+        // If something went wrong for some reason
+        if (placeToTeleport == null) {
+            // @TODO: Probabilmente non va - testare sto messaggio
+            player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
+            return;
+        }
+
         event.setRespawnLocation(placeToTeleport);
 
         // Force teleport after 1 tick for a better optimization
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
-            TeleportManager.teleportPlayer(player, placeToTeleport);
-        }, 1L);
+        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> TeleportManager.teleportPlayer(player, placeToTeleport), 1L);
     }
 
 }
