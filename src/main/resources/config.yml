@@ -9,8 +9,20 @@
 #
 
 # Default Configuration File
+database: #Only MySQL supported
+  credentials:
+    username: ''
+    password: ''
+    port: 3306
+    database: ''
+    dbUrl: 'localhost'
+
+coins:
+  use-playerpoints: true
+  coins-per-win: 1
+
 message-join: "&7Welcome to our minigame!" # Join Chat Message
-game-prefix: "&8|| &bGra&avity&7 &8| " #Prefix
+game-prefix: "&8|| &bGra&avity&7 &8| &R" #Prefix
 max-players: 10
 min-players: 2
 maps-per-game: 5 # Number of Maps for each game
@@ -23,5 +35,3 @@ lobbyspawn:
     z: 0
     yaw: 0
     pitch: 0
-
-maps:

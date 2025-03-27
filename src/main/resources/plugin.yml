@@ -4,6 +4,10 @@ author: xAspired (GianMattia)
 main: me.xaspired.GravityReal.Main
 api-version: 1.17 # the version of the API you want to use, required starting with 1.13
 # List of commands.
+
+# Optional Dependencies
+softdepend: [PlayerPoints]
+
 commands:
   gravity:
     description: Shows a list of possible command to do while admin

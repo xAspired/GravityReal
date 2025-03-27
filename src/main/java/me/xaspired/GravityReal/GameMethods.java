@@ -1,11 +1,18 @@
 package me.xaspired.GravityReal;
 
+import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.TeleportManager;
+import me.xaspired.GravityReal.Objects.GravityPlayer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,21 +20,32 @@ import static org.bukkit.Bukkit.getServer;
 
 @SuppressWarnings({"deprecation", "ConstantConditions"})
 public class GameMethods {
+
+    /* **********************************************
+            Game Variables Declaration
+     ********************************************** */
     public enum GameStatus {
         NOTYETSTARTED,
         STARTEDCOUNTDOWN,
         STARTED,
         ENDING
     }
-    static GameStatus status = GameStatus.NOTYETSTARTED;
+
+    public enum PlayerStatus {
+        NONE,
+        INGAME,
+        FINISHED
+    }
 
     //Timer
     public static boolean isTimerStarted = false;
     public static int countdownReverse = 0;
 
-    //Maps
+    //Maps and In-Game-Players Variables
     public static HashMap<String, Integer> mapsIndex = new HashMap<>();
     public static HashMap<Integer, String> indexMaps = new HashMap<>();
+
+    static GameStatus status = GameStatus.NOTYETSTARTED;
 
 
     /* **********************************************
@@ -35,54 +53,80 @@ public class GameMethods {
      ********************************************** */
     public static StringBuilder initializeGameAndMaps() {
         int numberMaps;
-
-        //Number of maps players will play in a Game (can be set in the config)
+        File mapsFolder = new File("plugins/GravityReal/maps/");
+        File[] mapsFiles = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
         StringBuilder nameMapsConcatenated = new StringBuilder();
 
-        //Check if the value of numberMaps is null (there aren't maps set in the config)
+        // Check if the value of numberMaps is null (there aren't maps set in the config)
         try {
-            //Number of Maps in the config
-            numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
+            // Number of Maps set
+            numberMaps = mapsFiles.length;
         } catch (Exception e) {
             numberMaps = 0;
         }
 
-        //Check if someone inserted a wrong value to 'maps-per-game' in config
-        //The code can't run if 'maps-per-game' are set to 5 but there are 3 maps set
-        if (numberMaps >= Main.getInstance().config.getInt("maps-per-game")) {
-            //Array based on the number of maps
-            ArrayList<Integer> tempNumberList = new ArrayList<>(numberMaps);
+        if (mapsFiles == null || mapsFiles.length == 0) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are no available maps. Please create new maps.");
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
+
+        int mapsPerGame = Main.getInstance().config.getInt("maps-per-game");
+
+        // Check if set maps are enough to let game starts
+        if (numberMaps >= mapsPerGame) {
+            // Creation of index array for the generation of the random maps
+            ArrayList<Integer> tempNumberList = new ArrayList<>();
             for (int i = 0; i < numberMaps; i++) {
                 tempNumberList.add(i);
             }
-            for (int count = 0; count < Main.getInstance().config.getInt("maps-per-game"); count++)
-            {
 
-                //Randomized map
-                String nameMapFor = (String) Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[tempNumberList.remove((int) (Math.random() * tempNumberList.size()))];
+            for (int count = 0; count < mapsPerGame && !tempNumberList.isEmpty(); count++) {
+                // Choose random index and remove it from the list
+                int randomIndex = tempNumberList.remove((int) (Math.random() * tempNumberList.size()));
+
+                // Verify the index is valid
+                if (randomIndex < 0 || randomIndex >= mapsFiles.length) {
+                    continue; // Salta se l'indice non è valido
+                }
+
+                // Get map's name without .json extension
+                String nameMapFor = mapsFiles[randomIndex].getName().replace(".json", "");
+
                 mapsIndex.put(nameMapFor, count);
                 indexMaps.put(count, nameMapFor);
 
-                //Different Color for Different Difficulty
-                //Try and catch for those who wrongly remove manually the "difficulty" string from config file
+                // Choose color according the difficulty written on file
+                File mapFile = new File("plugins/GravityReal/maps/" + nameMapFor + ".json");
+                ChatColor mapColor = ChatColor.WHITE; // Default
+
                 try {
-                    if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("easy"))
-                        nameMapsConcatenated.append(ChatColor.GREEN).append(indexMaps.get(count));
-                    else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("medium"))
-                        nameMapsConcatenated.append(ChatColor.YELLOW).append(indexMaps.get(count));
-                    else if (Main.getInstance().getConfig().getString("maps." + indexMaps.get(count) + ".difficulty").equalsIgnoreCase("hard"))
-                        nameMapsConcatenated.append(ChatColor.RED).append(indexMaps.get(count));
+                    String content = new String(Files.readAllBytes(Paths.get(mapFile.getPath())));
+                    JSONObject mapData = new JSONObject(content);
+
+                    String difficulty = mapData.optString("difficulty", "unknown").toLowerCase();
+                    mapColor = switch (difficulty) {
+                        case "easy" -> ChatColor.GREEN;
+                        case "medium" -> ChatColor.YELLOW;
+                        case "hard" -> ChatColor.RED;
+                        default -> mapColor;
+                    };
+
                 } catch (Exception e) {
-                    nameMapsConcatenated.append(ChatColor.WHITE).append(indexMaps.get(count));
+                    Bukkit.getLogger().warning("Error reading map difficulty for " + nameMapFor);
                 }
 
-                //Settings to don't add the minus at the end of the StringBuilder
-                if (count < Main.getInstance().config.getInt("maps-per-game") - 1)
+                // Add map with its color
+                nameMapsConcatenated.append(mapColor).append(nameMapFor);
+
+                // Add "-" only if the map it's the last one of the list
+                if (count < mapsPerGame - 1) {
                     nameMapsConcatenated.append(ChatColor.WHITE).append(" - ");
+                }
             }
-        }
-        else {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game starts. Check your 'maps-per-game' in config, or create new maps.");
+
+        } else {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game start. Check your 'maps-per-game' setting or create new maps.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -97,26 +141,50 @@ public class GameMethods {
            Create the Object for the First Map
      ********************************************** */
     public static Object[] firstMapSetup() {
-        World firstMap;
-
-        //If some spanwpoints are not set:
-        try {
-            //Create a new virtual world
-            firstMap = Bukkit.getServer().getWorld(Main.getInstance().getConfig().getString("maps." + indexMaps.get(0) + ".spawnpoint.world"));
-        } catch (Exception e) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game couldn't start because there are some maps without spawnpoint. Check in the config and set it with /gravity setmapspawn <map>");
+        if (indexMaps.isEmpty() || indexMaps.get(0) == null) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
 
-        //Coords taken from the conf.yml file
-        double x = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.x");
-        double y = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.y");
-        double z = Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.z");
-        float yaw = (float) Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.yaw");
-        float pitch = (float) Main.getInstance().getConfig().getDouble("maps." + indexMaps.get(0) + ".spawnpoint.pitch");
+        String firstMapName = indexMaps.get(0);
+        File mapFile = new File("plugins/GravityReal/maps/" + firstMapName + ".json");
 
-        return new Object[] {firstMap, x, y, z, yaw, pitch};
+        if (!mapFile.exists()) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
+
+        try {
+            // Get the JSON about the map
+            String content = new String(Files.readAllBytes(Paths.get(mapFile.getPath())));
+            JSONObject mapData = new JSONObject(content);
+
+            // Get world first map
+            World firstMap = Bukkit.getServer().getWorld(mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world"));
+            if (firstMap == null) {
+                Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
+                status = GameStatus.NOTYETSTARTED;
+                return null;
+            }
+
+            // Get coords of the first map - @TODO: Credo sia sbagliato
+            JSONObject spawnpoint = mapData.getJSONArray("spawnpoints").getJSONObject(0);
+            double x = spawnpoint.getDouble("x");
+            double y = spawnpoint.getDouble("y");
+            double z = spawnpoint.getDouble("z");
+            float yaw = (float) spawnpoint.getDouble("yaw");
+            float pitch = (float) spawnpoint.getDouble("pitch");
+
+            return new Object[]{firstMap, x, y, z, yaw, pitch};
+
+        } catch (Exception e) {
+            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
+            e.printStackTrace();
+            status = GameStatus.NOTYETSTARTED;
+            return null;
+        }
     }
 
 
@@ -130,7 +198,7 @@ public class GameMethods {
         actionbarMaps(initializeGameAndMaps());
 
         //If for some reason Maps above are not correctly initialized and then also actionbar
-        //status will become NOTYETSTARTED again and then we should go outside this method
+        //status will become NOTYETSTARTED again, and then we should go outside this method
         if (status == GameStatus.NOTYETSTARTED)
             return;
 
@@ -144,7 +212,7 @@ public class GameMethods {
 
                 Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + countdownStarter);
 
-                //Countdown stopped if no minimum player online is more satisfied
+                // Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
                     Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
                     cancel();
@@ -156,10 +224,10 @@ public class GameMethods {
                             Teleport All Players to First Map
                     ********************************************** */
                     for (Player player : getServer().getOnlinePlayers()) {
-                        //Take the return of the method about the generation of the 1st Map
+                        // Take the return of the method about the generation of the 1st Map
                         Object[] firstMapObj = firstMapSetup();
 
-                        //Check if the return method about the 1st Map gave an exception
+                        // Check if the return method about the 1st Map gave an exception
                         if (firstMapObj == null) {
                             cancel();
                             return;
@@ -169,18 +237,23 @@ public class GameMethods {
 
                         TeleportManager.teleportPlayer(player, firstMap); //Teleport All
 
-                        //Player Setup
+                        // Player Setup
                         player.setMaxHealth(6);
                         player.setHealthScale(6);
                         player.setGameMode(GameMode.ADVENTURE);
 
-                        Main.getInstance().scorePlayer[0] = null;
-                        Main.getInstance().scorePlayer[1] = null;
-                        Main.getInstance().scorePlayer[2] = null;
-                        Main.getInstance().scorePlayer[3] = null;
-                        Main.getInstance().scorePlayer[4] = null;
-                        Main.getInstance().createBoard(player); //Creation of the Board
-                        timerPlayers(); //Start board timer
+                        // Update Player status
+                        GravityPlayer playerObj = Main.getInstance().inGamePlayers.get(player);
+                        playerObj.setStatus(PlayerStatus.INGAME);
+                        Main.getInstance().inGamePlayers.put(player, playerObj);
+
+                        BoardManager.scorePlayer[0] = null;
+                        BoardManager.scorePlayer[1] = null;
+                        BoardManager.scorePlayer[2] = null;
+                        BoardManager.scorePlayer[3] = null;
+                        BoardManager.scorePlayer[4] = null;
+                        BoardManager.createBoard(player); // Creation of the Board
+                        timerPlayers(); // Start board timer
 
                     }
                     cancel();
@@ -216,43 +289,40 @@ public class GameMethods {
         }
     }
 
-    public static void endGame(Player playerWin) {
-        if (!(status == GameStatus.ENDING)) {
-            status = GameStatus.ENDING;
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + playerWin.getName() + ChatColor.YELLOW + " finished the game!");
+    public static void endGame() {
+        status = GameStatus.ENDING;
 
-            new BukkitRunnable() {
-                int countdownStarter = 240;
+        new BukkitRunnable() {
+            int countdownStarter = 240;
 
-                public void run() {
-                    if (!(status == GameStatus.ENDING))
-                        cancel();
+            public void run() {
+                if (!(status == GameStatus.ENDING))
+                    cancel();
 
-                    if (countdownStarter == 240)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
-                    else if (countdownStarter == 180)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
-                    else if (countdownStarter == 120)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
-                    else if (countdownStarter == 60)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
-                    else if (countdownStarter == 3)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
-                    else if (countdownStarter == 2)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
-                    else if (countdownStarter == 1)
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                if (countdownStarter == 240)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                else if (countdownStarter == 180)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                else if (countdownStarter == 120)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                else if (countdownStarter == 60)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                else if (countdownStarter == 3)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                else if (countdownStarter == 2)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                else if (countdownStarter == 1)
+                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
 
-                    if (--countdownStarter < 0) {
-                        for (Player player : getServer().getOnlinePlayers()) {
-                            player.performCommand("spawn");
-                        }
-                        status = GameStatus.NOTYETSTARTED;
-                        cancel();
+                if (--countdownStarter < 0) {
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        player.performCommand("spawn");
                     }
+                    UsefulMethods.resetGame();
+                    cancel();
                 }
-            }.runTaskTimer(Main.getInstance(), 20, 20);
-        }
+            }
+        }.runTaskTimer(Main.getInstance(), 20, 20);
     }
 
     public static void timerPlayers() {
@@ -265,7 +335,7 @@ public class GameMethods {
             new BukkitRunnable() {
                 public void run() {
 
-                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time") || Bukkit.getOnlinePlayers().size() == 0) {
+                    if (++countdownReverse > Main.getInstance().getConfig().getInt("duration-time") || Bukkit.getOnlinePlayers().isEmpty()) {
                         cancel();
                     }
                 }

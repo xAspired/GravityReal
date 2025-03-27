@@ -1,20 +1,30 @@
-package me.xaspired.GravityReal;
+package me.xaspired.GravityReal.Commands;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import me.xaspired.GravityReal.GameMethods;
+import me.xaspired.GravityReal.GlobalVariables;
+import me.xaspired.GravityReal.Main;
+import me.xaspired.GravityReal.Managers.MapsManager;
+import me.xaspired.GravityReal.Managers.TeleportManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 
 
 @SuppressWarnings("ConstantConditions")
 public class CommandGravity implements CommandExecutor {
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
@@ -91,47 +101,44 @@ public class CommandGravity implements CommandExecutor {
         else if (args[0].equalsIgnoreCase("createmap")) {
             String nameMap;
 
-            //Check that player have wrote the name of the map
+            //Create the maps directory
+            File directory = new File("plugins/GravityReal/maps");
+            if (!directory.exists())
+                directory.mkdir();
+
+            // Check that player has written the name of the map
             try {
                 nameMap = args[1];
             } catch (Exception e) {
                 player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name for your new map!");
                 return true;
             }
-            boolean isFor = false;
 
+            String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
+            File fileMap = new File(fileName);
 
-            //If the name of the map already exists
-            try {
-                if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
-
-                    //Set isFor to true if the name of the map already exists
-                    isFor = true;
-                }
-            } catch (Exception ignored) {}
-
-
-            if (!isFor) {
-                //Adding blank values under the name of the map. Then, when someone type /gravity setmapspawn <map> the values are overwritten
-                //I need to add a number first, that's the header of the map (e.g. 3)
-
-
-                Main.getInstance().getConfig().set("maps." + nameMap, nameMap);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.world", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.x", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.y", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.z", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.pitch", 0);
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.yaw", 0);
-                Main.getInstance().saveConfig();
-
-
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " created!");
-
+            // If the name of the file's map already exists
+            if (fileMap.exists()) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "This map already exists!");
+                return true;
             }
-            else {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map already exists!");
+
+            // Verify the correct creation of the file
+            try {
+                fileMap.createNewFile();
+            } catch (IOException e) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Error while creating map file. Try asking to the Dev.");
+                return true;
+            }
+
+            JSONObject mapData = MapsManager.initializeMap(nameMap, Main.getInstance().getConfig().getInt("max-players"));
+
+            // JSON File writer
+            try (FileWriter writer = new FileWriter(fileName)) {
+                writer.write(mapData.toString(4));
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map saved in " + ChatColor.YELLOW  + fileName + ChatColor.GRAY + "!");
+            } catch (IOException e) {
+                System.out.println("Errore durante la scrittura nel file: " + e.getMessage());
             }
 
             return true;
@@ -141,38 +148,34 @@ public class CommandGravity implements CommandExecutor {
                   /gravity setmapspawn <map> - Command
         ********************************************** */
         else if (args[0].equalsIgnoreCase("setmapspawn")) {
-            String nameMap;
 
-            try {
-                nameMap = args[1];
-            } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
+            // Arguments < 3 so there isn't any spawnIndex set
+            if (args.length < 3) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Usage: /gravity setmapspawn <mapname> <spawnIndex>");
                 return true;
             }
-            boolean isFor = false;
 
-            //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            // Get name Map from argument 1
+            String nameMap = args[1];
+            int spawnIndex;
 
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.world", player.getLocation().getWorld().getName());
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.x", player.getLocation().getX());
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.y", player.getLocation().getY());
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.z", player.getLocation().getZ());
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.pitch", player.getLocation().getPitch());
-                Main.getInstance().getConfig().set("maps." + nameMap + ".spawnpoint.yaw", player.getLocation().getYaw());
-                Main.getInstance().saveConfig();
-                player.getLocation().getWorld().setGameRuleValue("doImmediateRespawn", "true");
+            try {
+                // Get spawn index from argument 2
+                spawnIndex = Integer.parseInt(args[2]);
 
-
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Spawn for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
-
-                //Set isFor to true if the name of the map already exists
-                isFor = true;
+                // It must be positive
+                if (spawnIndex < 1) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Invalid spawn index! Must be higher than 0.");
+                return true;
             }
 
-            if (!isFor)
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
-
+            // Set Map Spawn for each index and verify everything is good
+            if (!MapsManager.setMapSpawn(nameMap, spawnIndex, player)) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Failed to set spawn point! Try to setup again the map or ask the dev");
+            }
             return true;
         }
 
@@ -183,7 +186,6 @@ public class CommandGravity implements CommandExecutor {
             String nameMap;
             String diffMap;
 
-
             try {
                 nameMap = args[1];
             } catch (Exception e) {
@@ -191,7 +193,7 @@ public class CommandGravity implements CommandExecutor {
                 return true;
             }
 
-            //Check player inserted the right difficulty
+            // Check if the player inserted a valid difficulty
             try {
                 diffMap = args[2];
                 if (!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard"))) {
@@ -199,32 +201,38 @@ public class CommandGravity implements CommandExecutor {
                     return true;
                 }
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [" + ChatColor.GREEN + "EASY" + ChatColor.GRAY + " - " + ChatColor.YELLOW + "MEDIUM" + ChatColor.GRAY + " - " + ChatColor.RED + "HARD" + ChatColor.GRAY + "]!");
                 return true;
             }
 
+            String fileName = "plugins/GravityReal/maps/" + nameMap + ".json";
+            File fileMap = new File(fileName);
 
-            boolean isFor = false;
-
-            //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
-
-                Main.getInstance().getConfig().set("maps." + nameMap + ".difficulty", diffMap);
-                Main.getInstance().saveConfig();
-
-                if (diffMap.equalsIgnoreCase("easy"))
-                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.GREEN + "Easy" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
-                else if (diffMap.equalsIgnoreCase("medium"))
-                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.YELLOW + "Medium" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
-                else
-                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + ChatColor.RED + "Hard" + ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
-
-                //Set isFor to true if the name of the map already exists
-                isFor = true;
+            if (!fileMap.exists()) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+                return true;
             }
 
-            if (!isFor)
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+            try {
+                String content = new String(Files.readAllBytes(Paths.get(fileName)));
+                JSONObject mapData = new JSONObject(content);
+                mapData.put("difficulty", diffMap.toLowerCase());
+
+                try (FileWriter fileWriter = new FileWriter(fileName)) {
+                    fileWriter.write(mapData.toString(4)); // Pretty print JSON
+                }
+
+                ChatColor difficultyColor = diffMap.equalsIgnoreCase("easy") ? ChatColor.GREEN :
+                        diffMap.equalsIgnoreCase("medium") ? ChatColor.YELLOW :
+                                ChatColor.RED;
+
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + difficultyColor + diffMap.substring(0, 1).toUpperCase() + diffMap.substring(1) +
+                        ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
+
+            } catch (IOException e) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error updating the map difficulty!");
+                e.printStackTrace();
+            }
 
             return true;
         }
@@ -243,25 +251,20 @@ public class CommandGravity implements CommandExecutor {
                    /gravity listmaps Command
         ********************************************** */
         else if (args[0].equalsIgnoreCase("listmaps")) {
+            File mapsFolder = new File("plugins/GravityReal/maps/");
+            File[] files = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
 
-            int numberMaps;
-
-            //Check if there are maps in the config
-            try {
-                numberMaps = Main.getInstance().config.getConfigurationSection("maps").getKeys(false).size();
-            } catch (Exception e) {
-                numberMaps = 0;
+            if (files == null || files.length == 0) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "No maps found!");
+                return true;
             }
 
-            if (numberMaps == 0)
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There is no map set yet");
-            else {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Here is the list of maps:");
-                player.sendMessage(ChatColor.DARK_GRAY + "|| ");
-            }
+            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Here is the list of maps:");
+            player.sendMessage(ChatColor.DARK_GRAY + "|| ");
 
-            for (int i = 0; i < numberMaps; i++) {
-                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i + 1) + ChatColor.GRAY + ". " + ChatColor.AQUA + Main.getInstance().config.getConfigurationSection("maps").getKeys(false).toArray()[i]);
+            for (int i = 0; i < files.length; i++) {
+                String mapName = files[i].getName().replace(".json", ""); // Remove .json extension from map names
+                player.sendMessage(ChatColor.DARK_GRAY + "|| " + ChatColor.GRAY + (i + 1) + ChatColor.GRAY + ". " + ChatColor.AQUA + mapName);
             }
 
             return true;
@@ -279,23 +282,19 @@ public class CommandGravity implements CommandExecutor {
                 player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
-            boolean isFor = false;
 
-            //If the name of the map already exists
-            if (Main.getInstance().config.getConfigurationSection("maps").getKeys(false).contains(nameMap)) {
+            File mapFile = new File("plugins/GravityReal/maps/" + nameMap + ".json");
 
-                Main.getInstance().getConfig().set("maps." + nameMap, null);
-                Main.getInstance().saveConfig();
-
-
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted!");
-
-                //Set isFor to true if the name of the map already exists
-                isFor = true;
+            if (!mapFile.exists()) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " does not exist!");
+                return true;
             }
 
-            if (!isFor)
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist!");
+            if (mapFile.delete()) {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted successfully!");
+            } else {
+                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error deleting the map " + ChatColor.AQUA + nameMap + ChatColor.RED + "!");
+            }
 
             return true;
         }
