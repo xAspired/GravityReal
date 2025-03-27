@@ -2,9 +2,11 @@ package me.xaspired.GravityReal;
 
 import me.xaspired.GravityReal.Commands.CommandGravity;
 import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
+import me.xaspired.GravityReal.Connections.DatabaseConnection;
 import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
+import me.xaspired.Shared.GravityCoinsAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,10 +30,6 @@ public class Main extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
     public static Main mainInstance;
 
-
-    /* **********************************************
-                  Board Variables
-    ********************************************** */
     public HashMap<Player, GravityPlayer> inGamePlayers = new HashMap<>();
 
     @Override
@@ -60,6 +58,11 @@ public class Main extends JavaPlugin implements Listener {
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);
 
+        // Enable the API Coins Setup
+        me.xaspired.Shared.GravityCoinsAPI.setup();
+
+        // Database Table Creation
+        DatabaseConnection.createTables();
 
         //Send a message that shows that the plugin was enabled successfully
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired -  " + "Plugin Enabled Successfully!");
@@ -155,13 +158,30 @@ public class Main extends JavaPlugin implements Listener {
                 // Check if the map of the player is equal to the last map
                 if (GameMethods.mapsIndex.get(player.getWorld().getName()).equals(Main.getInstance().config.getInt("maps-per-game") - 1)) {
 
+                    // Set player status and update the list
+                    playerObj.setStatus(GameMethods.PlayerStatus.FINISHED);
+                    inGamePlayers.put(event.getPlayer(), playerObj);
+
                     // If everyone has finished
                     if (inGamePlayers.values().stream().noneMatch(p -> p.getStatus().equals(GameMethods.PlayerStatus.INGAME))) {
                         event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0].getName() + "§R§7 with " + inGamePlayers.get(BoardManager.scorePlayer[0]).getGameTime() + "§7s ", 10, 80, 10);
                         UsefulMethods.resetGame();
-                    } else if (!(GameMethods.status == GameMethods.GameStatus.ENDING)) {
+                    }
+                    // Otherwise if the first player has finished
+                    else if (!(GameMethods.status == GameMethods.GameStatus.ENDING)) {
                         GameMethods.endGame();
                         Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + player.getName() + ChatColor.YELLOW + " finished the game!");
+
+                        if (!GravityCoinsAPI.isCoinsAvailable()) {
+                            Bukkit.getLogger().warning(ChatColor.RED + "Coins not available at the moment. Check carefully plugin settings.");
+                            return;
+                        }
+
+                        // Add coins to Player and send him a message (check coins config)
+                        GravityCoinsAPI.addCoins(player.getUniqueId(), getConfig().getInt("coins-per-win"));
+                        int coins = me.xaspired.Shared.GravityCoinsAPI.getCoins(player.getUniqueId());
+                        player.sendMessage(ChatColor.YELLOW + "Now you have " + coins + " coins.");
+
                     }
 
                     // Teleport player to mainLobby after 0.5 seconds for a better optimization
@@ -177,10 +197,6 @@ public class Main extends JavaPlugin implements Listener {
 
                 // Verify that the result of the next map is not null
                 else if (!(GameMethods.indexMaps.get((GameMethods.mapsIndex.get(player.getWorld().getName()) + 1)).isEmpty())) {
-
-                    // Set player status and update the list
-                    playerObj.setStatus(GameMethods.PlayerStatus.FINISHED);
-                    inGamePlayers.put(event.getPlayer(), playerObj);
 
                     Location placeToTeleport = TeleportManager.getNextSpawnMap(player);
 

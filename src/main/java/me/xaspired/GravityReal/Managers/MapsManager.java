@@ -25,7 +25,7 @@ public class MapsManager {
     public static JSONObject initializeMap(String nameMap, int configMaxPlayers) {
         JSONObject mapData = new JSONObject();
         mapData.put("name", nameMap);
-        mapData.put("difficulty", 0);
+        mapData.put("difficulty", "default");
         mapData.put("playersNumber", configMaxPlayers);
 
         // Initialize Spawnpoints to 0 for each one according to the config maxPlayers' number

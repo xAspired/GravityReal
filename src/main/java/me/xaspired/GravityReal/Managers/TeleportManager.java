@@ -29,6 +29,7 @@ public class TeleportManager {
              Lobby Teleport
     ********************************************** */
     public static Location getLobbySpawn() {
+        try {
             //Create a new virtual object named world, that names is the same as the one in the config
             World Lobby = Bukkit.getServer().getWorld(Objects.requireNonNull(Main.getInstance().getConfig().getString("lobbyspawn.spawnpoint.world")));
             assert Lobby != null;
@@ -42,6 +43,13 @@ public class TeleportManager {
             double pitch = Main.getInstance().getConfig().getDouble("lobbyspawn.spawnpoint.pitch");
 
             return new Location(Lobby, x, y, z, (float) yaw, (float) pitch);
+
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Error loading spawn lobby : " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
     /* **********************************************

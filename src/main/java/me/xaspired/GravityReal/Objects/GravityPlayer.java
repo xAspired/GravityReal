@@ -2,31 +2,19 @@ package me.xaspired.GravityReal.Objects;
 
 import me.xaspired.GravityReal.GameMethods;
 import org.bukkit.entity.Player;
-
-// @TODO: Reperire le info del player da un db o da un file custom (coins, failsTotal)
 public class GravityPlayer {
-    private Player player;
+
     private GameMethods.PlayerStatus status;
     private int actualMap;
     private int gameTime;
     private int failsMap;
-    private int failsTotal;
-    private int coins;
 
     // Costructor
     public GravityPlayer(Player player, GameMethods.PlayerStatus status, int actualMap, int gameTime, int failsMap, int failsTotal, int coins) {
-        this.player = player;
         this.status = status;
         this.actualMap = actualMap;
         this.gameTime = gameTime;
         this.failsMap = failsMap;
-        this.failsTotal = failsTotal;
-        this.coins = coins;
-    }
-
-    // Getter
-    public Player getPlayer() {
-        return player;
     }
 
     public GameMethods.PlayerStatus getStatus() {
@@ -41,21 +29,8 @@ public class GravityPlayer {
         return failsMap;
     }
 
-    public int getFailsTotal() {
-        return failsTotal;
-    }
-
-    public int getCoins() {
-        return coins;
-    }
-
     public int getGameTime() {
         return gameTime;
-    }
-
-    // Setter
-    public void setPlayer(Player player) {
-        this.player = player;
     }
 
     public void setStatus(GameMethods.PlayerStatus status) {
@@ -70,16 +45,7 @@ public class GravityPlayer {
         this.failsMap = failsMap;
     }
 
-    public void setFailsTotal(int failsTotal) {
-        this.failsTotal = failsTotal;
-    }
-
-    public void setCoins(int coins) {
-        this.coins = coins;
-    }
-
     public void setGameTime(int gameTime) {
         this.gameTime = gameTime;
     }
 }
-
