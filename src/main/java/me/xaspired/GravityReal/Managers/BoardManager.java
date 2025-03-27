@@ -130,6 +130,16 @@ public class BoardManager {
             scores[i].setScore(5 - i);
         }
 
+        Score score1 = obj.getScore("  ");
+        score1.setScore(1);
+
+        // Print map fails in the scoreboard
+        Score score0 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Fails: " + ChatColor.WHITE + Main.getInstance().inGamePlayers.get(player).getFailsGame());
+        score0.setScore(0);
+
+        Score scoreNeg1 = obj.getScore("  ");
+        scoreNeg1.setScore(-1);
+
         player.setScoreboard(board);
     }
 

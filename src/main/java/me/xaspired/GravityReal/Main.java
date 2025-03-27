@@ -7,6 +7,7 @@ import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
 import me.xaspired.Shared.GravityCoinsAPI;
+import me.xaspired.Shared.GravityStatsAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -87,7 +88,7 @@ public class Main extends JavaPlugin implements Listener {
         int maxPlayers = config.getInt("max-players");
 
         Player player = event.getPlayer();
-        GravityPlayer playerObj = new GravityPlayer(player, GameMethods.PlayerStatus.NONE, 0, 0, 0, 0, 0);
+        GravityPlayer playerObj = new GravityPlayer(GameMethods.PlayerStatus.NONE, 0, 0, 0);
         inGamePlayers.put(player, playerObj);
 
         //Remove basic "Player joined the game" message
@@ -131,7 +132,8 @@ public class Main extends JavaPlugin implements Listener {
 
             // Increment his map fails by 1
             GravityPlayer playerObj = inGamePlayers.get(event.getEntity().getPlayer());
-            playerObj.setFailsMap(playerObj.getFailsMap() + 1);
+            playerObj.setFailsGame(playerObj.getFailsGame() + 1);
+            GravityStatsAPI.incrementFailsTotal(event.getEntity().getPlayer().getUniqueId());
             inGamePlayers.put(event.getEntity().getPlayer(), playerObj);
         }
     }
@@ -202,7 +204,6 @@ public class Main extends JavaPlugin implements Listener {
 
                     // If something went wrong for some reason
                     if (placeToTeleport == null) {
-                        // @TODO: Probabilmente non va - testare sto messaggio
                         player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
                         return;
                     }
@@ -231,7 +232,6 @@ public class Main extends JavaPlugin implements Listener {
 
         // If something went wrong for some reason
         if (placeToTeleport == null) {
-            // @TODO: Probabilmente non va - testare sto messaggio
             player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
             return;
         }

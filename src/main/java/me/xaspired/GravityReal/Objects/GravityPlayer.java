@@ -1,20 +1,20 @@
 package me.xaspired.GravityReal.Objects;
 
 import me.xaspired.GravityReal.GameMethods;
-import org.bukkit.entity.Player;
+
 public class GravityPlayer {
 
     private GameMethods.PlayerStatus status;
     private int actualMap;
     private int gameTime;
-    private int failsMap;
+    private int failsGame;
 
-    // Costructor
-    public GravityPlayer(Player player, GameMethods.PlayerStatus status, int actualMap, int gameTime, int failsMap, int failsTotal, int coins) {
+    // Constructor
+    public GravityPlayer(GameMethods.PlayerStatus status, int actualMap, int gameTime, int failsGame) {
         this.status = status;
         this.actualMap = actualMap;
         this.gameTime = gameTime;
-        this.failsMap = failsMap;
+        this.failsGame = failsGame;
     }
 
     public GameMethods.PlayerStatus getStatus() {
@@ -25,8 +25,8 @@ public class GravityPlayer {
         return actualMap;
     }
 
-    public int getFailsMap() {
-        return failsMap;
+    public int getFailsGame() {
+        return failsGame;
     }
 
     public int getGameTime() {
@@ -41,8 +41,8 @@ public class GravityPlayer {
         this.actualMap = actualMap;
     }
 
-    public void setFailsMap(int failsMap) {
-        this.failsMap = failsMap;
+    public void setFailsGame(int failsGame) {
+        this.failsGame = failsGame;
     }
 
     public void setGameTime(int gameTime) {
