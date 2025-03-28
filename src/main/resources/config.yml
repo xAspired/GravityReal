@@ -9,7 +9,8 @@
 #
 
 # Default Configuration File
-database: #Only MySQL supported
+database:
+  storage: "mysql" #mysql, local
   credentials:
     username: ''
     password: ''
@@ -21,8 +22,23 @@ coins:
   use-playerpoints: true
   coins-per-win: 1
 
-message-join: "&7Welcome to our minigame!" # Join Chat Message
-game-prefix: "&8|| &bGra&avity&7 &8| &R" #Prefix
+messages: # !DO NOT CHANGE PLACEHOLDERS!
+  message-join: "&7Welcome to our minigame!"
+  game-prefix: "&8|| &bGra&avity&7 &8| &R"
+  welcome-title: "&fWelcome to &bGra&avity"
+  queue-title: "&fYou are now in &e&nqueue"
+  teleporting-error: "&7There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."
+  greetings-playing: "&fThanks for playing!"
+  game-winner: "&7The winner is &e&n{PLAYER}&R&7 with {TIME}&7s"
+  winner-message: "&d{PLAYER} &efinished the game!"
+  actual-coins: "&eNow you have {COINS} coins."
+  kick-reason-1: "Game is still in progress"
+  scoreboard:
+    your-stats: "&e&lYour Stats:"
+    ranking: "&3&lRanking:"
+    waiting: "&f{NUMBER}#  Waiting..."
+
+
 max-players: 10
 min-players: 2
 maps-per-game: 5 # Number of Maps for each game

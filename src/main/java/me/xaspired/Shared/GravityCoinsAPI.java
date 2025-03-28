@@ -1,7 +1,7 @@
 package me.xaspired.Shared;
 
 import me.xaspired.GravityReal.Connections.DatabaseConnection;
-import me.xaspired.GravityReal.GlobalVariables;
+import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Main;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -33,10 +33,10 @@ public class GravityCoinsAPI {
             if (plugin != null && plugin.isEnabled()) {
                 playerPointsAPI = plugin.getAPI();
                 coinsAvailable = true;
-                Bukkit.getLogger().info(GlobalVariables.pluginPrefix + " Connected with PlayerPoints!");
+                Bukkit.getLogger().info(MessagesManager.pluginPrefix + " Connected with PlayerPoints!");
                 return;
             } else {
-                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + " PlayerPoints enabled but not found. Checking fallback on MySQL.");
+                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + " PlayerPoints enabled but not found. Checking fallback on MySQL.");
             }
         }
 
@@ -44,12 +44,12 @@ public class GravityCoinsAPI {
         try (Connection conn = DatabaseConnection.getConnection()) {
             if (conn != null) {
                 coinsAvailable = true;
-                Bukkit.getLogger().info(GlobalVariables.pluginPrefix + " Fallback on MySQL enabled.");
+                Bukkit.getLogger().info(MessagesManager.pluginPrefix + " Fallback on MySQL enabled.");
             } else {
-                Bukkit.getLogger().severe(GlobalVariables.pluginPrefix + " Coins not available (PlayerPoints not enabled, MySQL not reachable).");
+                Bukkit.getLogger().severe(MessagesManager.pluginPrefix + " Coins not available (PlayerPoints not enabled, MySQL not reachable).");
             }
         } catch (Exception e) {
-            Bukkit.getLogger().severe(GlobalVariables.pluginPrefix + " Error while using MySQL: " + e.getMessage());
+            Bukkit.getLogger().severe(MessagesManager.pluginPrefix + " Error while using MySQL: " + e.getMessage());
         }
     }
 

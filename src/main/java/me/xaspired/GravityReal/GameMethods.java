@@ -1,6 +1,7 @@
 package me.xaspired.GravityReal;
 
 import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
 import net.md_5.bungee.api.ChatMessageType;
@@ -66,7 +67,7 @@ public class GameMethods {
         }
 
         if (mapsFiles == null || mapsFiles.length == 0) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are no available maps. Please create new maps.");
+            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "There are no available maps. Please create new maps.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -126,7 +127,7 @@ public class GameMethods {
             }
 
         } else {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game start. Check your 'maps-per-game' setting or create new maps.");
+            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game start. Check your 'maps-per-game' setting or create new maps.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -142,7 +143,7 @@ public class GameMethods {
      ********************************************** */
     public static Object[] firstMapSetup() {
         if (indexMaps.isEmpty() || indexMaps.get(0) == null) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
+            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -151,7 +152,7 @@ public class GameMethods {
         File mapFile = new File("plugins/GravityReal/maps/" + firstMapName + ".json");
 
         if (!mapFile.exists()) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
+            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
             status = GameStatus.NOTYETSTARTED;
             return null;
         }
@@ -164,7 +165,7 @@ public class GameMethods {
             // Get world first map
             World firstMap = Bukkit.getServer().getWorld(mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world"));
             if (firstMap == null) {
-                Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
+                Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
                 status = GameStatus.NOTYETSTARTED;
                 return null;
             }
@@ -180,7 +181,7 @@ public class GameMethods {
             return new Object[]{firstMap, x, y, z, yaw, pitch};
 
         } catch (Exception e) {
-            Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
+            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
             e.printStackTrace();
             status = GameStatus.NOTYETSTARTED;
             return null;
@@ -203,18 +204,18 @@ public class GameMethods {
             return;
 
         //Broadcasting that the minPlayers is satisfied
-        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players reached!");
-        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY + "...");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Minimum number of players reached!");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY + "...");
         new BukkitRunnable() {
             int countdownStarter = 10;
 
             public void run() {
 
-                Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + countdownStarter);
+                Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + countdownStarter);
 
                 // Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
                     cancel();
                 }
                 if (--countdownStarter < 0) {
@@ -300,19 +301,19 @@ public class GameMethods {
                     cancel();
 
                 if (countdownStarter == 240)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
                 else if (countdownStarter == 180)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
                 else if (countdownStarter == 120)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
                 else if (countdownStarter == 60)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
                 else if (countdownStarter == 3)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
                 else if (countdownStarter == 2)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
                 else if (countdownStarter == 1)
-                    Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
 
                 if (--countdownStarter < 0) {
                     for (Player player : getServer().getOnlinePlayers()) {

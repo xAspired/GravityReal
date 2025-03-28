@@ -3,7 +3,7 @@ package me.xaspired.GravityReal.Commands;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import me.xaspired.GravityReal.GameMethods;
-import me.xaspired.GravityReal.GlobalVariables;
+import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Main;
 import me.xaspired.GravityReal.Managers.MapsManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
@@ -110,7 +110,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name for your new map!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "You must declare a name for your new map!");
                 return true;
             }
 
@@ -119,7 +119,7 @@ public class CommandGravity implements CommandExecutor {
 
             // If the name of the file's map already exists
             if (fileMap.exists()) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "This map already exists!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "This map already exists!");
                 return true;
             }
 
@@ -127,7 +127,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 fileMap.createNewFile();
             } catch (IOException e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Error while creating map file. Try asking to the Dev.");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Error while creating map file. Try asking to the Dev.");
                 return true;
             }
 
@@ -136,9 +136,9 @@ public class CommandGravity implements CommandExecutor {
             // JSON File writer
             try (FileWriter writer = new FileWriter(fileName)) {
                 writer.write(mapData.toString(4));
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map saved in " + ChatColor.YELLOW  + fileName + ChatColor.GRAY + "!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Map saved in " + ChatColor.YELLOW  + fileName + ChatColor.GRAY + "!");
             } catch (IOException e) {
-                System.out.println("Errore durante la scrittura nel file: " + e.getMessage());
+                System.out.println("Error while creating map file: " + e.getMessage());
             }
 
             return true;
@@ -151,7 +151,7 @@ public class CommandGravity implements CommandExecutor {
 
             // Arguments < 3 so there isn't any spawnIndex set
             if (args.length < 3) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Usage: /gravity setmapspawn <mapname> <spawnIndex>");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Usage: /gravity setmapspawn <mapname> <spawnIndex>");
                 return true;
             }
 
@@ -168,13 +168,13 @@ public class CommandGravity implements CommandExecutor {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Invalid spawn index! Must be higher than 0.");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Invalid spawn index! Must be higher than 0.");
                 return true;
             }
 
             // Set Map Spawn for each index and verify everything is good
             if (!MapsManager.setMapSpawn(nameMap, spawnIndex, player)) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Failed to set spawn point! Try to setup again the map or ask the dev");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Failed to set spawn point! Try to setup again the map or ask the dev");
             }
             return true;
         }
@@ -189,7 +189,7 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
 
@@ -197,11 +197,11 @@ public class CommandGravity implements CommandExecutor {
             try {
                 diffMap = args[2];
                 if (!(diffMap.equalsIgnoreCase("easy") || diffMap.equalsIgnoreCase("medium") || diffMap.equalsIgnoreCase("hard"))) {
-                    player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
+                    player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [EASY - MEDIUM - HARD]!");
                     return true;
                 }
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [" + ChatColor.GREEN + "EASY" + ChatColor.GRAY + " - " + ChatColor.YELLOW + "MEDIUM" + ChatColor.GRAY + " - " + ChatColor.RED + "HARD" + ChatColor.GRAY + "]!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "You must choose a difficulty between [" + ChatColor.GREEN + "EASY" + ChatColor.GRAY + " - " + ChatColor.YELLOW + "MEDIUM" + ChatColor.GRAY + " - " + ChatColor.RED + "HARD" + ChatColor.GRAY + "]!");
                 return true;
             }
 
@@ -209,7 +209,7 @@ public class CommandGravity implements CommandExecutor {
             File fileMap = new File(fileName);
 
             if (!fileMap.exists()) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The map doesn't exist! Please be sure to create one first with /gravity createmap <map>");
                 return true;
             }
 
@@ -226,11 +226,11 @@ public class CommandGravity implements CommandExecutor {
                         diffMap.equalsIgnoreCase("medium") ? ChatColor.YELLOW :
                                 ChatColor.RED;
 
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Difficulty " + difficultyColor + diffMap.substring(0, 1).toUpperCase() + diffMap.substring(1) +
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Difficulty " + difficultyColor + diffMap.substring(0, 1).toUpperCase() + diffMap.substring(1) +
                         ChatColor.GRAY + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set!");
 
             } catch (IOException e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error updating the map difficulty!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error updating the map difficulty!");
                 e.printStackTrace();
             }
 
@@ -243,7 +243,11 @@ public class CommandGravity implements CommandExecutor {
 
         else if (args[0].equalsIgnoreCase("reload")) {
             Main.getInstance().reloadConfig();
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
+
+            // Re-initialize messages checker
+            MessagesManager.init();
+
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Config reloaded! You may have to restart your server.");
             return true;
         }
 
@@ -255,11 +259,11 @@ public class CommandGravity implements CommandExecutor {
             File[] files = mapsFolder.listFiles((dir, name) -> name.endsWith(".json"));
 
             if (files == null || files.length == 0) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "No maps found!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "No maps found!");
                 return true;
             }
 
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Here is the list of maps:");
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Here is the list of maps:");
             player.sendMessage(ChatColor.DARK_GRAY + "|| ");
 
             for (int i = 0; i < files.length; i++) {
@@ -279,21 +283,21 @@ public class CommandGravity implements CommandExecutor {
             try {
                 nameMap = args[1];
             } catch (Exception e) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "You must declare a name of a map!");
                 return true;
             }
 
             File mapFile = new File("plugins/GravityReal/maps/" + nameMap + ".json");
 
             if (!mapFile.exists()) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "The map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " does not exist!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " does not exist!");
                 return true;
             }
 
             if (mapFile.delete()) {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted successfully!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " deleted successfully!");
             } else {
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error deleting the map " + ChatColor.AQUA + nameMap + ChatColor.RED + "!");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error deleting the map " + ChatColor.AQUA + nameMap + ChatColor.RED + "!");
             }
 
             return true;
@@ -312,12 +316,12 @@ public class CommandGravity implements CommandExecutor {
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.pitch", player.getLocation().getPitch());
             Main.getInstance().getConfig().set("lobbyspawn.spawnpoint.yaw", player.getLocation().getYaw());
             Main.getInstance().saveConfig();
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Lobby Spawnpoint Set!");
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Lobby Spawnpoint Set!");
             return true;
         }
 
 
-        player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Incorrect Syntax! Type /gravity for help");
+        player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Incorrect Syntax! Type /gravity for help");
         return true;
     }
 }

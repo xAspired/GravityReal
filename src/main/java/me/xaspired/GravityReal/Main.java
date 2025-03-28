@@ -4,6 +4,7 @@ import me.xaspired.GravityReal.Commands.CommandGravity;
 import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
 import me.xaspired.GravityReal.Connections.DatabaseConnection;
 import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
 import me.xaspired.Shared.GravityCoinsAPI;
@@ -24,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -62,8 +64,11 @@ public class Main extends JavaPlugin implements Listener {
         // Enable the API Coins Setup
         me.xaspired.Shared.GravityCoinsAPI.setup();
 
-        // Database Table Creation
+        // Database Setup
         DatabaseConnection.createTables();
+
+        // Initialize messages checker
+        MessagesManager.init();
 
         //Send a message that shows that the plugin was enabled successfully
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired -  " + "Plugin Enabled Successfully!");
@@ -81,7 +86,7 @@ public class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (GameMethods.status == GameMethods.GameStatus.STARTED || GameMethods.status == GameMethods.GameStatus.ENDING) {
-            event.getPlayer().kickPlayer("Game is still in progress");
+            event.getPlayer().kickPlayer(MessagesManager.kickReason1);
             return;
         }
 
@@ -98,11 +103,11 @@ public class Main extends JavaPlugin implements Listener {
         TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
 
         //Send the custom message written in config under "message-join"
-        event.getPlayer().sendMessage(GlobalVariables.pluginPrefix + GlobalVariables.joinMessage);
-        event.getPlayer().sendTitle("§fWelcome to §bGra§avity", "§fYou are now in §e§nqueue", 10, 80, 10);
+        event.getPlayer().sendMessage(MessagesManager.pluginPrefix + MessagesManager.joinMessage);
+        event.getPlayer().sendTitle(MessagesManager.welcomeTitle, MessagesManager.queueTitle, 10, 80, 10);
 
         //Send the join message
-        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players is the one inserted in the config
         if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED || GameMethods.status == GameMethods.GameStatus.STARTEDCOUNTDOWN)) {
@@ -166,14 +171,27 @@ public class Main extends JavaPlugin implements Listener {
 
                     // If everyone has finished
                     if (inGamePlayers.values().stream().noneMatch(p -> p.getStatus().equals(GameMethods.PlayerStatus.INGAME))) {
-                        event.getPlayer().sendTitle("§fThanks for playing!", "§7The winner is §e§n" + BoardManager.scorePlayer[0].getName() + "§R§7 with " + inGamePlayers.get(BoardManager.scorePlayer[0]).getGameTime() + "§7s ", 10, 80, 10);
+
+                        // Custom title message including placeholder variables set in the config
+                        String gameWinnerMessage = MessagesManager.getFormatted("messages.game-winner", Map.of(
+                                "PLAYER", BoardManager.scorePlayer[0].getName(),
+                                "TIME", UsefulMethods.returnTimeFormatted(inGamePlayers.get(BoardManager.scorePlayer[0]).getGameTime())
+                        ));
+                        event.getPlayer().sendTitle(MessagesManager.greetingsPlaying, gameWinnerMessage, 10, 80, 10);
+
                         UsefulMethods.resetGame();
                     }
                     // Otherwise if the first player has finished
                     else if (!(GameMethods.status == GameMethods.GameStatus.ENDING)) {
                         GameMethods.endGame();
-                        Bukkit.broadcastMessage(GlobalVariables.pluginPrefix + ChatColor.LIGHT_PURPLE + player.getName() + ChatColor.YELLOW + " finished the game!");
 
+                        // Winner message set in the config
+                        String winnerMessage = MessagesManager.getFormatted("messages.winner-message", Map.of(
+                                "PLAYER", player.getName()
+                        ));
+                        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + winnerMessage);
+
+                        // If coins methods are not available, the plugin will skip it and doesn't assign anything
                         if (!GravityCoinsAPI.isCoinsAvailable()) {
                             Bukkit.getLogger().warning(ChatColor.RED + "Coins not available at the moment. Check carefully plugin settings.");
                             return;
@@ -181,8 +199,12 @@ public class Main extends JavaPlugin implements Listener {
 
                         // Add coins to Player and send him a message (check coins config)
                         GravityCoinsAPI.addCoins(player.getUniqueId(), getConfig().getInt("coins-per-win"));
-                        int coins = me.xaspired.Shared.GravityCoinsAPI.getCoins(player.getUniqueId());
-                        player.sendMessage(ChatColor.YELLOW + "Now you have " + coins + " coins.");
+
+                        // Coins Message
+                        String coinsMessage = MessagesManager.getFormatted("messages.winner-message", Map.of(
+                                "COINS", String.valueOf(GravityCoinsAPI.getCoins(player.getUniqueId()))
+                        ));
+                        player.sendMessage(coinsMessage);
 
                     }
 
@@ -204,7 +226,7 @@ public class Main extends JavaPlugin implements Listener {
 
                     // If something went wrong for some reason
                     if (placeToTeleport == null) {
-                        player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
+                        player.spigot().sendMessage(ChatMessageType.valueOf(MessagesManager.pluginPrefix + MessagesManager.teleportingError));
                         return;
                     }
 
@@ -232,7 +254,7 @@ public class Main extends JavaPlugin implements Listener {
 
         // If something went wrong for some reason
         if (placeToTeleport == null) {
-            player.spigot().sendMessage(ChatMessageType.valueOf(GlobalVariables.pluginPrefix + ChatColor.GRAY + "There was a problem teleporting you into the correct spawnpoint. Please report it to a server admin."));
+            player.spigot().sendMessage(ChatMessageType.valueOf(MessagesManager.pluginPrefix + MessagesManager.teleportingError));
             return;
         }
 

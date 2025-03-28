@@ -7,6 +7,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
+import java.util.Map;
+
 public class BoardManager {
 
     public static Player[] scorePlayer = {null, null, null, null, null};
@@ -20,7 +22,7 @@ public class BoardManager {
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         Score score11 = obj.getScore(ChatColor.DARK_GRAY + " ");
         score11.setScore(11);
-        Score score10 = obj.getScore(ChatColor.YELLOW + ChatColor.BOLD.toString() + "Your Stats:");
+        Score score10 = obj.getScore(MessagesManager.yourStats);
         score10.setScore(10);
         Score score9 = obj.getScore("  " + ChatColor.WHITE + player.getName());
         score9.setScore(9);
@@ -28,7 +30,7 @@ public class BoardManager {
         score8.setScore(8);
         Score score7 = obj.getScore("  ");
         score7.setScore(7);
-        Score score6 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Ranking:");
+        Score score6 = obj.getScore(MessagesManager.ranking);
         score6.setScore(6);
 
         for (Player playerInFor : Main.getInstance().getServer().getOnlinePlayers()) {
@@ -103,7 +105,12 @@ public class BoardManager {
 
             // Check if player is null (not arrived)
             if (scorePlayer[i] == null) {
-                scores[i] = obj.getScore(ChatColor.WHITE + String.valueOf(i + 1) + "#  Waiting...");
+
+                // Getting waiting message from config
+                String waitingMessage = MessagesManager.getFormatted("messages.scoreboard.waiting", Map.of(
+                        "NUMBER", String.valueOf(i + 1)
+                ));
+                scores[i] = obj.getScore(waitingMessage);
             }
             else {
                 // Check if player has finished

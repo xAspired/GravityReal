@@ -1,7 +1,6 @@
 package me.xaspired.GravityReal.Managers;
 
 import me.xaspired.GravityReal.GameMethods;
-import me.xaspired.GravityReal.GlobalVariables;
 import me.xaspired.GravityReal.Main;
 import me.xaspired.GravityReal.UsefulMethods;
 import org.bukkit.Bukkit;
@@ -17,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public class TeleportManager {
-    //@TODO Add Check if Every Locations Exist
     /* **********************************************
              Teleport Player
     ********************************************** */
@@ -45,7 +43,7 @@ public class TeleportManager {
             return new Location(Lobby, x, y, z, (float) yaw, (float) pitch);
 
         } catch (Exception e) {
-            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Error loading spawn lobby : " + e.getMessage());
+            Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "Error loading spawn lobby : " + e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -69,7 +67,6 @@ public class TeleportManager {
     /* **********************************************
                 Common Spawn Method
     ********************************************** */
-    //@TODO: Check su dove vengono stampati sti errori (console o game?)
     private static Location getMapSpawn(Player player, int mapIndex) {
         String mapName = GameMethods.indexMaps.get(mapIndex);
         String fileName = "plugins/GravityReal/maps/" + mapName + ".json";
@@ -77,7 +74,7 @@ public class TeleportManager {
 
         // If the file doesn't exist
         if (!fileMap.exists()) {
-            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "There was a problem finding " + mapName + " file.");
+            Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "There was a problem finding " + mapName + " file.");
             return null;
         }
 
@@ -88,7 +85,7 @@ public class TeleportManager {
 
             // If "INGAME" players are > of map spawnpoints (playersNumber)
             if (mapData.getInt("playersNumber") < Main.getInstance().inGamePlayers.values().stream().filter(p -> p.getStatus().equals(GameMethods.PlayerStatus.INGAME)).count()) {
-                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Can't properly check spawnpoints because "
+                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "Can't properly check spawnpoints because "
                         + mapName + "'s player number is lower than players who are actually playing.");
                 return null;
             }
@@ -96,14 +93,14 @@ public class TeleportManager {
             // Get spawnpoints
             JSONArray spawnPoints = mapData.optJSONArray("spawnpoints");
             if (spawnPoints == null || spawnPoints.isEmpty()) {
-                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "No spawnpoints found in " + mapName);
+                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "No spawnpoints found in " + mapName);
                 return null;
             }
 
             // Get player spawn index
             int playerIndex = UsefulMethods.getInGamePlayerIndex(player);
             if (playerIndex >= spawnPoints.length()) {
-                Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Player index out of range in " + mapName + " spawnpoints.");
+                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "Player index out of range in " + mapName + " spawnpoints.");
                 return null;
             }
 
@@ -118,7 +115,7 @@ public class TeleportManager {
             return new Location(world, x, y, z, yaw, pitch);
 
         } catch (Exception e) {
-            Bukkit.getLogger().warning(GlobalVariables.pluginPrefix + "Error loading map " + mapName + ": " + e.getMessage());
+            Bukkit.getLogger().warning(MessagesManager.pluginPrefix + "Error loading map " + mapName + ": " + e.getMessage());
             e.printStackTrace();
             return null;
         }

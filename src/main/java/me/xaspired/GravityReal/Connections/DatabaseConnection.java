@@ -1,6 +1,6 @@
 package me.xaspired.GravityReal.Connections;
 
-import me.xaspired.GravityReal.GlobalVariables;
+import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,6 +10,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
+
+    public static String DBCheckerFromConfig = "local";
+
+
     private static Connection createConnection() throws SQLException {
         String dbUrl = Main.getInstance().getConfig().getString("database.credentials.dbUrl");
         int port = Main.getInstance().getConfig().getInt("database.credentials.port");
@@ -23,16 +27,22 @@ public class DatabaseConnection {
 
     // Give rapid connections
     public static Connection getConnection() {
-        try {
-            return createConnection();
-        } catch (SQLException e) {
-            Bukkit.getConsoleSender().sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "MySQL Connection error: " + e.getMessage());
-            return null;
+        if (DatabaseConnection.DBCheckerFromConfig.equalsIgnoreCase("mysql")) {
+            try {
+                return createConnection();
+            } catch (SQLException e) {
+                Bukkit.getConsoleSender().sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "MySQL Connection error: " + e.getMessage());
+                return null;
+            }
         }
+        else
+            return null;
     }
 
     // Only for DB Table Creation on Startup
     public static void createTables() {
+        DBCheckerFromConfig = Main.getInstance().getConfig().getString("database.storage", "local");
+
         try (Connection conn = getConnection()) {
             if (conn == null) return;
 
@@ -47,9 +57,9 @@ public class DatabaseConnection {
 
             conn.createStatement().execute(gravityUserDataTable);
 
-            Bukkit.getConsoleSender().sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "MySQL tables created or verified.");
+            Bukkit.getConsoleSender().sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "MySQL tables created or verified.");
         } catch (SQLException e) {
-            Bukkit.getConsoleSender().sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error creating MySQL tables: " + e.getMessage());
+            Bukkit.getConsoleSender().sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error creating MySQL tables: " + e.getMessage());
         }
     }
 }

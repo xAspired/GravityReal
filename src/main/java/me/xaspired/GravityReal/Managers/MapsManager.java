@@ -1,6 +1,5 @@
 package me.xaspired.GravityReal.Managers;
 
-import me.xaspired.GravityReal.GlobalVariables;
 import org.bukkit.entity.Player;
 import org.bukkit.ChatColor;
 import org.json.JSONArray;
@@ -52,7 +51,7 @@ public class MapsManager {
         File fileMap = new File(fileName);
 
         if (!fileMap.exists()) {
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "This map doesn't exist! Create it with /gravity createmap <mapname>");
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "This map doesn't exist! Create it with /gravity createmap <mapname>");
             return false;
         }
 
@@ -82,17 +81,17 @@ public class MapsManager {
             spawnpoint.put("pitch", player.getLocation().getPitch());
             spawnpoint.put("yaw", player.getLocation().getYaw());
 
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "Spawn point " + spawnIndex + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set! " + spawnIndex + "/" + configMaxPlayers);
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Spawn point " + spawnIndex + " for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + " set! " + spawnIndex + "/" + configMaxPlayers);
 
             // Check if every spawnpoint are set
             if (allSpawnsSet(spawnpoints, configMaxPlayers)) {
                 saveMapToFile(nameMap);
-                player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.GRAY + "All spawn points set for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + "! Map saved.");
+                player.sendMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "All spawn points set for map " + ChatColor.AQUA + nameMap + ChatColor.GRAY + "! Map saved.");
             }
             return true;
 
         } catch (IOException e) {
-            player.sendMessage(GlobalVariables.pluginPrefix + ChatColor.RED + "Error updating the map file! Try again or ask dev.");
+            player.sendMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error updating the map file! Try again or ask dev.");
             e.printStackTrace();
             return false;
         }
