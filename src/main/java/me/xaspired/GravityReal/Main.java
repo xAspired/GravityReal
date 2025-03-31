@@ -191,12 +191,6 @@ public class Main extends JavaPlugin implements Listener {
                         ));
                         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + winnerMessage);
 
-                        // If coins methods are not available, the plugin will skip it and doesn't assign anything
-                        if (!GravityCoinsAPI.isCoinsAvailable()) {
-                            Bukkit.getLogger().warning(ChatColor.RED + "Coins not available at the moment. Check carefully plugin settings.");
-                            return;
-                        }
-
                         // Add coins to Player and send him a message (check coins config)
                         GravityCoinsAPI.addCoins(player.getUniqueId(), getConfig().getInt("coins-per-win"));
 

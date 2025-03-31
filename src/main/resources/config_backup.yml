@@ -10,6 +10,11 @@
 
 # Copy of Configuration File
 # If something breaks, replace 'config.yml' with this one
+
+# Priorities:
+# Coins: PlayerPoints, MySQL, Local
+# Stats: MySQL, Local
+# Local is the fallback method when something doesn't work
 database: #Only MySQL supported
   storage: "mysql" #mysql, local
   credentials:
@@ -20,7 +25,7 @@ database: #Only MySQL supported
     dbUrl: 'localhost'
 
 coins:
-  use-playerpoints: true
+  use-playerpoints: true # If true it will override the storage and use the playerpoints API
   coins-per-win: 1
 
 messages: # !DO NOT CHANGE PLACEHOLDERS!

@@ -13,63 +13,76 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+/* **********************************************
+                  PRIORITIES
+          Coins: PlayerPoints - MySQL - Local
+          Stats: MySQL - Local
+********************************************** */
+
 public class GravityCoinsAPI {
 
     private static PlayerPointsAPI playerPointsAPI = null;
-    private static boolean usePlayerPointsFromConfig = false;
-    private static boolean coinsAvailable = false;
+    private static boolean usingPlayerPoints = false;
+
+    static boolean usingMySQL() {
+        return !Main.getInstance().getConfig().getString("database.storage", "mysql").equalsIgnoreCase("local");
+    }
+
+    public static boolean usingPlayerPoints() {
+        return usingPlayerPoints && playerPointsAPI != null;
+    }
 
     /* **********************************************
                   Coins Setup Method
     ********************************************** */
     public static void setup() {
-        usePlayerPointsFromConfig = Main.getInstance().getConfig().getBoolean("coins.use-playerpoints", true);
+        usingPlayerPoints = Main.getInstance().getConfig().getBoolean("coins.use-playerpoints", true);
 
-        if (usePlayerPointsFromConfig) {
+        // Priority 1: PlayerPoints
+        if (usingPlayerPoints) {
             // Check if PlayerPoints plugin is inside our server
             PlayerPoints plugin = (PlayerPoints) Bukkit.getPluginManager().getPlugin("PlayerPoints");
 
             // If is all good
             if (plugin != null && plugin.isEnabled()) {
                 playerPointsAPI = plugin.getAPI();
-                coinsAvailable = true;
                 Bukkit.getLogger().info(MessagesManager.pluginPrefix + " Connected with PlayerPoints!");
                 return;
             } else {
-                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + " PlayerPoints enabled but not found. Checking fallback on MySQL.");
+                Bukkit.getLogger().warning(MessagesManager.pluginPrefix + " PlayerPoints enabled but not found. Checking fallback on MySQL, otherwise it will use local storage.");
             }
         }
 
-        // Fallback on MySQL
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            if (conn != null) {
-                coinsAvailable = true;
-                Bukkit.getLogger().info(MessagesManager.pluginPrefix + " Fallback on MySQL enabled.");
-            } else {
-                Bukkit.getLogger().severe(MessagesManager.pluginPrefix + " Coins not available (PlayerPoints not enabled, MySQL not reachable).");
+        // Priority 2: MySQL
+        if (usingMySQL()) {
+
+            try (Connection conn = DatabaseConnection.getConnection()) {
+                if (conn != null)
+                    Bukkit.getLogger().info(MessagesManager.pluginPrefix + " Fallback on MySQL enabled.");
+            } catch (Exception e) {
+                Bukkit.getLogger().severe(MessagesManager.pluginPrefix + " Error while using MySQL: " + e.getMessage());
             }
-        } catch (Exception e) {
-            Bukkit.getLogger().severe(MessagesManager.pluginPrefix + " Error while using MySQL: " + e.getMessage());
+
         }
-    }
 
-    public static boolean isCoinsAvailable() {
-        return coinsAvailable;
-    }
-
-    public static boolean usingPlayerPoints() {
-        return usePlayerPointsFromConfig && playerPointsAPI != null;
+        // Priority 3: Local
+        else {
+            GravityStatsAPI.setupLocalStorage();
+        }
     }
 
     /* **********************************************
                   Get Coins Method
     ********************************************** */
     public static int getCoins(UUID uuid) {
-        if (!coinsAvailable) return 0;
 
+        // Priority 1: PlayerPoints
         if (usingPlayerPoints()) {
             return playerPointsAPI.look(uuid);
-        } else {
+        }
+
+        // Priority 2: MySQL
+        else if (usingMySQL()) {
             try (Connection conn = DatabaseConnection.getConnection()) {
                 assert conn != null;
                 try (PreparedStatement ps = conn.prepareStatement("SELECT coins FROM gravity_user_data WHERE uuid = ?")) {
@@ -82,17 +95,26 @@ public class GravityCoinsAPI {
             }
             return 0;
         }
+
+        // Priority 3: Local
+        else {
+            GravityStatsAPI.setupLocalStorage();
+            return GravityStatsAPI.statsFile.getInt(uuid.toString() + ".coins", 0);
+        }
     }
 
     /* **********************************************
                   Set Coins Method
     ********************************************** */
     public static void setCoins(UUID uuid, int coins) {
-        if (!coinsAvailable) return;
 
+        // Priority 1: PlayerPoints
         if (usingPlayerPoints()) {
             playerPointsAPI.set(uuid, coins);
-        } else {
+        }
+
+        // Priority 2: MySQL
+        else if (usingMySQL()) {
             try (Connection conn = DatabaseConnection.getConnection()) {
                 assert conn != null;
                 try (PreparedStatement ps = conn.prepareStatement("INSERT INTO gravity_user_data (uuid, coins) VALUES (?, ?) ON DUPLICATE KEY UPDATE coins = ?")) {
@@ -105,17 +127,27 @@ public class GravityCoinsAPI {
                 e.printStackTrace();
             }
         }
+
+        // Priority 3: Local
+        else {
+            GravityStatsAPI.setupLocalStorage();
+            GravityStatsAPI.statsFile.set(uuid.toString() + ".coins", coins);
+            GravityStatsAPI.saveLocalFile();
+        }
     }
 
     /* **********************************************
                   Add Coins Method
     ********************************************** */
     public static void addCoins(UUID uuid, int amount) {
-        if (!coinsAvailable) return;
 
+        // Priority 1: PlayerPoints
         if (usingPlayerPoints()) {
             playerPointsAPI.give(uuid, amount);
-        } else {
+        }
+
+        // Priority 2-3: MySQL - Local
+        else {
             int current = getCoins(uuid);
             setCoins(uuid, current + amount);
         }
