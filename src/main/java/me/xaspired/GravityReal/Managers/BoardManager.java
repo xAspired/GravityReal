@@ -142,7 +142,7 @@ public class BoardManager {
         score0.setScore(1);
 
         // Print map fails in the scoreboard
-        Score scoreNeg1 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Fails: " + ChatColor.WHITE + Main.getInstance().inGamePlayers.get(player).getFailsGame());
+        Score scoreNeg1 = obj.getScore(ChatColor.RED + ChatColor.BOLD.toString() + "Fails: " + ChatColor.WHITE + Main.getInstance().inGamePlayers.get(player).getFailsGame());
         scoreNeg1.setScore(0);
 
         player.setScoreboard(board);
