@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## [Unreleased] [2.0.0]
 ### Added
 - MySQL Integration
+- Wins
+- Fails to ScoreBoard
 - Local DB Integration
 - PlayerPoints Soft-Dependency Integration
 - Now when all players finish, the game will stop instantly with a Title Bar
@@ -20,4 +22,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - Optimized resetGame method
 
 ### Fixed
+- Color on ScoreBoard
 - Fixed broken switch-case for game ending countdown
