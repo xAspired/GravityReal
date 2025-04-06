@@ -54,7 +54,7 @@ public class GravityStatsAPI {
     }
 
     /* **********************************************
-                  Get Fails Method
+                  Get Fails
     ********************************************** */
     public static int getFailsTotal(UUID uuid) {
         if (usingLocalStorage()) {
@@ -76,7 +76,29 @@ public class GravityStatsAPI {
     }
 
     /* **********************************************
-                  Set Fails Method
+                  Get Wins
+    ********************************************** */
+    public static int getWins(UUID uuid) {
+        if (usingLocalStorage()) {
+            setupLocalStorage();
+            return statsFile.getInt(uuid.toString() + ".wins", 0);
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            assert conn != null;
+            try (PreparedStatement ps = conn.prepareStatement("SELECT wins FROM gravity_user_data WHERE uuid = ?")) {
+                ps.setString(1, uuid.toString());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) return rs.getInt("wins");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /* **********************************************
+                  Set Fails
     ********************************************** */
     public static void setFailsTotal(UUID uuid, int totalFails) {
         if (usingLocalStorage()) {
@@ -101,10 +123,42 @@ public class GravityStatsAPI {
     }
 
     /* **********************************************
-                  Increment Fails Method
+                  Set Wins
+    ********************************************** */
+    public static void setWins(UUID uuid, int wins) {
+        if (usingLocalStorage()) {
+            setupLocalStorage();
+            statsFile.set(uuid.toString() + ".wins", wins);
+            saveLocalFile();
+            return;
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            assert conn != null;
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO gravity_user_data (uuid, wins) VALUES (?, ?) ON DUPLICATE KEY UPDATE wins = ?")) {
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, wins);
+                ps.setInt(3, wins);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* **********************************************
+                  Increment Fails
     ********************************************** */
     public static void incrementFailsTotal(UUID uuid) {
         setFailsTotal(uuid, getFailsTotal(uuid) + 1);
+    }
+
+    /* **********************************************
+                  Increment Wins
+    ********************************************** */
+    public static void incrementWins(UUID uuid) {
+        setWins(uuid, getWins(uuid) + 1);
     }
 
 }

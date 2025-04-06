@@ -56,7 +56,8 @@ public class DatabaseConnection {
                 CREATE TABLE IF NOT EXISTS gravity_user_data (
                     uuid VARCHAR(36) PRIMARY KEY,
                     coins INT NOT NULL DEFAULT 0,
-                    fails_total INT NOT NULL DEFAULT 0
+                    fails_total INT NOT NULL DEFAULT 0,
+                    wins INT NOT NULL DEFAULT 0
                 );
                 """;
 

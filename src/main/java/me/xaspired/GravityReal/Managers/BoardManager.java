@@ -21,17 +21,17 @@ public class BoardManager {
         Objective obj = board.registerNewObjective("GravityScore", "forDummy", ChatColor.translateAlternateColorCodes('&', "&a&lGra&b&lvity"));
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         Score score11 = obj.getScore(ChatColor.DARK_GRAY + " ");
-        score11.setScore(11);
+        score11.setScore(12);
         Score score10 = obj.getScore(MessagesManager.yourStats);
-        score10.setScore(10);
+        score10.setScore(11);
         Score score9 = obj.getScore("  " + ChatColor.WHITE + player.getName());
-        score9.setScore(9);
+        score9.setScore(10);
         Score score8 = obj.getScore("   ");
-        score8.setScore(8);
+        score8.setScore(9);
         Score score7 = obj.getScore("  ");
-        score7.setScore(7);
+        score7.setScore(8);
         Score score6 = obj.getScore(MessagesManager.ranking);
-        score6.setScore(6);
+        score6.setScore(7);
 
         for (Player playerInFor : Main.getInstance().getServer().getOnlinePlayers()) {
 
@@ -100,7 +100,7 @@ public class BoardManager {
 
 
         // Set up scoreboard 5 rows
-        Score[] scores = new Score[5]; //@TODO check funzionalità
+        Score[] scores = new Score[5];
         for (int i = 0; i < 5; ++i) {
 
             // Check if player is null (not arrived)
@@ -116,16 +116,17 @@ public class BoardManager {
                 // Check if player has finished
                 if (Main.getInstance().inGamePlayers.get(scorePlayer[i]).getActualMap() == Main.getInstance().getConfig().getInt("maps-per-game")) {
                     int realpos = i+1;
-                    // @TODO Testare lo switch
-                    switch(realpos) {
-                        case 1:
-                            scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
-                        case 2:
-                            scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
-                        case 3:
-                            scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
-                        default:
-                            scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
+                    if (realpos == 1) {
+                        scores[i] = obj.getScore(ChatColor.GOLD + "1#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
+                    }
+                    else if (realpos == 2) {
+                        scores[i] = obj.getScore(ChatColor.GRAY + "2#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
+                    }
+                    else if (realpos == 3) {
+                        scores[i] = obj.getScore(ChatColor.DARK_RED + "3#  " + scorePlayer[i].getName() + " " + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
+                    }
+                    else {
+                        scores[i] = obj.getScore(ChatColor.GREEN + String.valueOf(realpos) + "#  " + scorePlayer[i].getName() + " " + ChatColor.GRAY + UsefulMethods.returnTimeFormatted(Main.getInstance().inGamePlayers.get(scorePlayer[i]).getGameTime()));
                     }
                 }
                 else {
@@ -134,18 +135,15 @@ public class BoardManager {
             }
 
             // Add row to scoreboard
-            scores[i].setScore(5 - i);
+            scores[i].setScore(6 - i);
         }
 
-        Score score1 = obj.getScore("  ");
-        score1.setScore(1);
+        Score score0 = obj.getScore("  ");
+        score0.setScore(1);
 
         // Print map fails in the scoreboard
-        Score score0 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Fails: " + ChatColor.WHITE + Main.getInstance().inGamePlayers.get(player).getFailsGame());
-        score0.setScore(0);
-
-        Score scoreNeg1 = obj.getScore("  ");
-        scoreNeg1.setScore(-1);
+        Score scoreNeg1 = obj.getScore(ChatColor.DARK_AQUA + ChatColor.BOLD.toString() + "Fails: " + ChatColor.WHITE + Main.getInstance().inGamePlayers.get(player).getFailsGame());
+        scoreNeg1.setScore(0);
 
         player.setScoreboard(board);
     }

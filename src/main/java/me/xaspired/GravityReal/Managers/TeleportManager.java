@@ -61,7 +61,7 @@ public class TeleportManager {
                 Get Next Spawn Map
     ********************************************** */
     public static Location getNextSpawnMap(Player player) {
-        return getMapSpawn(player, Main.getInstance().inGamePlayers.get(player).getActualMap() + 1);
+        return getMapSpawn(player, Main.getInstance().inGamePlayers.get(player).getActualMap());
     }
 
     /* **********************************************

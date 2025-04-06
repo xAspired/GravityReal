@@ -132,9 +132,6 @@ public class GameMethods {
             return null;
         }
 
-        if (status == GameStatus.NOTYETSTARTED)
-            startGameCountdown();
-
         return nameMapsConcatenated;
     }
 
@@ -317,7 +314,7 @@ public class GameMethods {
 
                 if (--countdownStarter < 0) {
                     for (Player player : getServer().getOnlinePlayers()) {
-                        player.performCommand("spawn");
+                        TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
                     }
                     UsefulMethods.resetGame();
                     cancel();

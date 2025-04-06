@@ -110,7 +110,7 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         //If the min of players is the one inserted in the config
-        if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED || GameMethods.status == GameMethods.GameStatus.STARTEDCOUNTDOWN)) {
+        if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED)) {
             GameMethods.startGameCountdown();
             playerObj.setActualMap(0);
             inGamePlayers.put(player, playerObj);
@@ -140,6 +140,7 @@ public class Main extends JavaPlugin implements Listener {
             playerObj.setFailsGame(playerObj.getFailsGame() + 1);
             GravityStatsAPI.incrementFailsTotal(event.getEntity().getPlayer().getUniqueId());
             inGamePlayers.put(event.getEntity().getPlayer(), playerObj);
+            BoardManager.createBoard(event.getEntity().getPlayer());
         }
     }
 
@@ -192,10 +193,11 @@ public class Main extends JavaPlugin implements Listener {
                         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + winnerMessage);
 
                         // Add coins to Player and send him a message (check coins config)
-                        GravityCoinsAPI.addCoins(player.getUniqueId(), getConfig().getInt("coins-per-win"));
+                        GravityCoinsAPI.addCoins(player.getUniqueId(), getConfig().getInt("coins.coins-per-win"));
+                        GravityStatsAPI.incrementWins(player.getUniqueId());
 
                         // Coins Message
-                        String coinsMessage = MessagesManager.getFormatted("messages.winner-message", Map.of(
+                        String coinsMessage = MessagesManager.getFormatted("messages.actual-coins", Map.of(
                                 "COINS", String.valueOf(GravityCoinsAPI.getCoins(player.getUniqueId()))
                         ));
                         player.sendMessage(coinsMessage);
