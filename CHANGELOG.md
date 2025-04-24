@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ## [Unreleased] [2.0.0]
 ### Added
+- Status file
 - MySQL Integration
 - Wins
 - Fails to ScoreBoard
