@@ -3,7 +3,10 @@ package me.xaspired.GravityReal;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.json.JSONObject;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,8 @@ public class UsefulMethods {
         GameMethods.countdownReverse = 0;
         GameMethods.isTimerStarted = false;
 
+        UsefulMethods.saveStatus(GameMethods.status);
+
         Main.getInstance().inGamePlayers.clear();
     }
 
@@ -46,5 +51,22 @@ public class UsefulMethods {
     public static int getInGamePlayerIndex(Player player) {
         List<GravityPlayer> playerList = new ArrayList<>(Main.getInstance().inGamePlayers.values());
         return playerList.indexOf(Main.getInstance().inGamePlayers.get(player));
+    }
+
+    /* **********************************************
+                 Save Status to JSON
+    ********************************************** */
+    public static void saveStatus(GameMethods.GameStatus status) {
+        JSONObject json = new JSONObject();
+        json.put("gameStatus", status.name());
+        json.put("onlinePlayers", Bukkit.getServer().getOnlinePlayers().size());
+        json.put("minPlayers", Main.getInstance().getConfig().getInt("min-players"));
+        json.put("maxPlayers", Main.getInstance().getConfig().getInt("max-players"));
+
+        try (FileWriter writer = new FileWriter(GameMethods.statusFile, false)) {
+            writer.write(json.toString(4));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -47,6 +47,7 @@ public class GameMethods {
     public static HashMap<Integer, String> indexMaps = new HashMap<>();
 
     static GameStatus status = GameStatus.NOTYETSTARTED;
+    static File statusFile = new File("plugins/GravityReal/status.json");
 
 
     /* **********************************************
@@ -129,6 +130,7 @@ public class GameMethods {
         } else {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "There are too few maps to let the game start. Check your 'maps-per-game' setting or create new maps.");
             status = GameStatus.NOTYETSTARTED;
+            UsefulMethods.saveStatus(status);
             return null;
         }
 
@@ -142,6 +144,7 @@ public class GameMethods {
         if (indexMaps.isEmpty() || indexMaps.get(0) == null) {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
             status = GameStatus.NOTYETSTARTED;
+            UsefulMethods.saveStatus(status);
             return null;
         }
 
@@ -151,6 +154,7 @@ public class GameMethods {
         if (!mapFile.exists()) {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
             status = GameStatus.NOTYETSTARTED;
+            UsefulMethods.saveStatus(status);
             return null;
         }
 
@@ -164,6 +168,7 @@ public class GameMethods {
             if (firstMap == null) {
                 Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
                 status = GameStatus.NOTYETSTARTED;
+                UsefulMethods.saveStatus(status);
                 return null;
             }
 
@@ -181,6 +186,7 @@ public class GameMethods {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
             e.printStackTrace();
             status = GameStatus.NOTYETSTARTED;
+            UsefulMethods.saveStatus(status);
             return null;
         }
     }
@@ -191,6 +197,7 @@ public class GameMethods {
      ********************************************** */
     public static void startGameCountdown() {
         status = GameStatus.STARTEDCOUNTDOWN;
+        UsefulMethods.saveStatus(status);
 
         //Nested methods -> Call an actionbar about the initialized random maps
         actionbarMaps(initializeGameAndMaps());
@@ -217,6 +224,7 @@ public class GameMethods {
                 }
                 if (--countdownStarter < 0) {
                     status = GameStatus.STARTED;
+                    UsefulMethods.saveStatus(status);
 
                     /* **********************************************
                             Teleport All Players to First Map
@@ -268,6 +276,7 @@ public class GameMethods {
 
         if (nameMapsConcatenated == null) {
             status = GameStatus.NOTYETSTARTED;
+            UsefulMethods.saveStatus(status);
             return;
         }
 
@@ -289,6 +298,7 @@ public class GameMethods {
 
     public static void endGame() {
         status = GameStatus.ENDING;
+        UsefulMethods.saveStatus(status);
 
         new BukkitRunnable() {
             int countdownStarter = 240;

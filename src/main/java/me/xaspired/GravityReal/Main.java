@@ -70,6 +70,9 @@ public class Main extends JavaPlugin implements Listener {
         // Initialize messages checker
         MessagesManager.init();
 
+        // Creation of Json File for Debuggin Game Status
+        String fileName = "plugins/GravityReal/status.json";
+
         //Send a message that shows that the plugin was enabled successfully
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired -  " + "Plugin Enabled Successfully!");
     }
@@ -96,20 +99,23 @@ public class Main extends JavaPlugin implements Listener {
         GravityPlayer playerObj = new GravityPlayer(GameMethods.PlayerStatus.NONE, 0, 0, 0);
         inGamePlayers.put(player, playerObj);
 
-        //Remove basic "Player joined the game" message
+        // Update fileStatus with player number
+        UsefulMethods.saveStatus(GameMethods.status);
+
+        // Remove basic "Player joined the game" message
         event.setJoinMessage(null);
 
-        //Teleport player to Lobby Spawn
+        // Teleport player to Lobby Spawn
         TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
 
-        //Send the custom message written in config under "message-join"
+        // Send the custom message written in config under "message-join"
         event.getPlayer().sendMessage(MessagesManager.pluginPrefix + MessagesManager.joinMessage);
         event.getPlayer().sendTitle(MessagesManager.welcomeTitle, MessagesManager.queueTitle, 10, 80, 10);
 
-        //Send the join message
+        // Send the join message
         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
-        //If the min of players is the one inserted in the config
+        // If the min of players is the one inserted in the config
         if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED)) {
             GameMethods.startGameCountdown();
             playerObj.setActualMap(0);
@@ -122,6 +128,9 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         //Remove basic "Player joined the game" message
         event.setQuitMessage(null);
+
+        // Update fileStatus with player number
+        UsefulMethods.saveStatus(GameMethods.status);
 
         //If there is no one on the Server, Game will be reset
         if (Bukkit.getOnlinePlayers().size() <= 1)

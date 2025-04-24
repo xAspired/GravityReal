@@ -56,6 +56,7 @@ public class MapsManager {
         }
 
         try {
+            // Create a JSON Object according to what's inside the file JSON
             JSONObject mapData;
             if (pendingMapUpdates.containsKey(nameMap)) {
                 mapData = pendingMapUpdates.get(nameMap);
@@ -65,6 +66,7 @@ public class MapsManager {
                 pendingMapUpdates.put(nameMap, mapData);
             }
 
+            // Create an Array from JSONObject collecting data securely
             JSONArray spawnpoints = mapData.optJSONArray("spawnpoints");
             int configMaxPlayers = mapData.getInt("playersNumber");
 
