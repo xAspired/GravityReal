@@ -1,5 +1,7 @@
 package me.xaspired.GravityReal;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import me.xaspired.GravityReal.Managers.BoardManager;
 import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
@@ -324,7 +326,12 @@ public class GameMethods {
 
                 if (--countdownStarter < 0) {
                     for (Player player : getServer().getOnlinePlayers()) {
-                        TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+
+                        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                        out.writeUTF("Connect");
+                        out.writeUTF("arcade");
+
+                        player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
                     }
                     UsefulMethods.resetGame();
                     cancel();

@@ -58,6 +58,9 @@ public class Main extends JavaPlugin implements Listener {
         getCommand("coords").setExecutor(new PlayerUtilitiesCommand());
         getCommand("gmc").setExecutor(new PlayerUtilitiesCommand());
 
+        // Enable Bungeecord Command (eg. "send Arcade")
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);
 
