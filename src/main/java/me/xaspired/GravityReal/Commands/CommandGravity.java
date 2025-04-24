@@ -41,7 +41,10 @@ public class CommandGravity implements CommandExecutor {
              ********************************************** */
 
             if (command.getName().equalsIgnoreCase("spawn")) {
-                TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                if (Main.getInstance().inGamePlayers.get(player).getStatus() == GameMethods.PlayerStatus.NONE) {
+                    TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                    return true;
+                }
             }
 
             /* **********************************************
