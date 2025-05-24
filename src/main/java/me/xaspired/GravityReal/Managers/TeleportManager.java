@@ -67,7 +67,7 @@ public class TeleportManager {
     /* **********************************************
                 Common Spawn Method
     ********************************************** */
-    private static Location getMapSpawn(Player player, int mapIndex) {
+    public static Location getMapSpawn(Player player, int mapIndex) {
         String mapName = GameMethods.indexMaps.get(mapIndex);
         String fileName = "plugins/GravityReal/maps/" + mapName + ".json";
         File fileMap = new File(fileName);

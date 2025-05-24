@@ -1,5 +1,7 @@
 package me.xaspired.GravityReal;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import me.xaspired.GravityReal.Commands.CommandGravity;
 import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
 import me.xaspired.GravityReal.Connections.DatabaseConnection;
@@ -26,6 +28,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.bukkit.Bukkit.getServer;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -116,7 +120,7 @@ public class Main extends JavaPlugin implements Listener {
         event.getPlayer().sendTitle(MessagesManager.welcomeTitle, MessagesManager.queueTitle, 10, 80, 10);
 
         // Send the join message
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " joined the game " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " è entrato nella lobby " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         // If the min of players is the one inserted in the config
         if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED)) {
@@ -191,6 +195,22 @@ public class Main extends JavaPlugin implements Listener {
                                 "TIME", UsefulMethods.returnTimeFormatted(inGamePlayers.get(BoardManager.scorePlayer[0]).getGameTime())
                         ));
                         event.getPlayer().sendTitle(MessagesManager.greetingsPlaying, gameWinnerMessage, 10, 80, 10);
+
+                        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Stai per essere reindirizzato alla Lobby dell'Arcade!");
+
+                        // Teleport everyone to the arcade server
+                        new BukkitRunnable() {
+                            public void run() {
+                                for (Player player : getServer().getOnlinePlayers()) {
+
+                                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                                    out.writeUTF("Connect");
+                                    out.writeUTF("arcade");
+
+                                    player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
+                                }
+                            }
+                        }.runTaskLater(this, 100L); // 100L = 100 Tick = 5 seconds
 
                         UsefulMethods.resetGame();
                     }

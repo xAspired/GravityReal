@@ -142,12 +142,12 @@ public class GameMethods {
     /* **********************************************
            Create the Object for the First Map
      ********************************************** */
-    public static Object[] firstMapSetup() {
+    public static void firstMapSetup() {
         if (indexMaps.isEmpty() || indexMaps.get(0) == null) {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "No maps selected. The game cannot start.");
             status = GameStatus.NOTYETSTARTED;
             UsefulMethods.saveStatus(status);
-            return null;
+            return;
         }
 
         String firstMapName = indexMaps.get(0);
@@ -157,7 +157,7 @@ public class GameMethods {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "The game couldn't start because the map file for " + firstMapName + " is missing.");
             status = GameStatus.NOTYETSTARTED;
             UsefulMethods.saveStatus(status);
-            return null;
+            return;
         }
 
         try {
@@ -171,25 +171,13 @@ public class GameMethods {
                 Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "World " + mapData.getJSONArray("spawnpoints").getJSONObject(0).getString("world") + " is not loaded.");
                 status = GameStatus.NOTYETSTARTED;
                 UsefulMethods.saveStatus(status);
-                return null;
             }
-
-            // Get coords of the first map - @TODO: Credo sia sbagliato
-            JSONObject spawnpoint = mapData.getJSONArray("spawnpoints").getJSONObject(0);
-            double x = spawnpoint.getDouble("x");
-            double y = spawnpoint.getDouble("y");
-            double z = spawnpoint.getDouble("z");
-            float yaw = (float) spawnpoint.getDouble("yaw");
-            float pitch = (float) spawnpoint.getDouble("pitch");
-
-            return new Object[]{firstMap, x, y, z, yaw, pitch};
 
         } catch (Exception e) {
             Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Error loading the first map's spawn point. Check the map file.");
             e.printStackTrace();
             status = GameStatus.NOTYETSTARTED;
             UsefulMethods.saveStatus(status);
-            return null;
         }
     }
 
@@ -210,8 +198,8 @@ public class GameMethods {
             return;
 
         //Broadcasting that the minPlayers is satisfied
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Minimum number of players reached!");
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Starting " + ChatColor.RED + "countdown" + ChatColor.DARK_GRAY + "...");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Numero minimo di player soddisfatto!");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Countdown" + ChatColor.GRAY + " iniziato " + ChatColor.DARK_GRAY + "...");
         new BukkitRunnable() {
             int countdownStarter = 10;
 
@@ -221,7 +209,7 @@ public class GameMethods {
 
                 // Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Minimum number of players no more satisfied. Countdown " + ChatColor.RED + "stopped" + ChatColor.GRAY + "!");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Numero minimo di player non più soddisfatto. Countdown " + ChatColor.RED + "fermato" + ChatColor.GRAY + "!");
                     cancel();
                 }
                 if (--countdownStarter < 0) {
@@ -232,18 +220,17 @@ public class GameMethods {
                             Teleport All Players to First Map
                     ********************************************** */
                     for (Player player : getServer().getOnlinePlayers()) {
-                        // Take the return of the method about the generation of the 1st Map
-                        Object[] firstMapObj = firstMapSetup();
+                        // Setup the first map
+                        firstMapSetup();
 
-                        // Check if the return method about the 1st Map gave an exception
-                        if (firstMapObj == null) {
+                        // Return if something went wrong in the first map setup, checked by game status
+                        if (status != GameStatus.STARTED) {
                             cancel();
                             return;
                         }
 
-                        Location firstMap = new Location((World) firstMapObj[0], (Double) firstMapObj[1], (Double) firstMapObj[2], (Double) firstMapObj[3], (Float) firstMapObj[4], (Float) firstMapObj[5]);
-
-                        TeleportManager.teleportPlayer(player, firstMap); //Teleport All
+                        // Teleport to the first map, with index 0
+                        player.teleport(TeleportManager.getMapSpawn(player, 0));
 
                         // Player Setup
                         player.setMaxHealth(6);
@@ -310,19 +297,15 @@ public class GameMethods {
                     cancel();
 
                 if (countdownStarter == 240)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 240 seconds ");
-                else if (countdownStarter == 180)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 180 seconds ");
-                else if (countdownStarter == 120)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 120 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Il gioco finirà tra 4 minuti");
                 else if (countdownStarter == 60)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 60 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Il gioco finirà tra 60 secondi");
                 else if (countdownStarter == 3)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 3 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Il gioco finirà tra 3 secondi");
                 else if (countdownStarter == 2)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 2 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Il gioco finirà tra 2 secondi");
                 else if (countdownStarter == 1)
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "The game will stop in 1 seconds ");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Il gioco finirà tra 1 secondo");
 
                 if (--countdownStarter < 0) {
                     for (Player player : getServer().getOnlinePlayers()) {
