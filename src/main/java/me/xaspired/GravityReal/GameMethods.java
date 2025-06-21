@@ -198,8 +198,8 @@ public class GameMethods {
             return;
 
         //Broadcasting that the minPlayers is satisfied
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Numero minimo di player soddisfatto!");
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.RED + "Countdown" + ChatColor.GRAY + " iniziato " + ChatColor.DARK_GRAY + "...");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + MessagesManager.minPlayerSatisfied);
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + MessagesManager.startedCountdown);
         new BukkitRunnable() {
             int countdownStarter = 10;
 
@@ -209,7 +209,7 @@ public class GameMethods {
 
                 // Countdown stopped if no minimum player online is more satisfied
                 if (!UsefulMethods.areMinPlayersOnline()) {
-                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Numero minimo di player non più soddisfatto. Countdown " + ChatColor.RED + "fermato" + ChatColor.GRAY + "!");
+                    Bukkit.broadcastMessage(MessagesManager.pluginPrefix + MessagesManager.minPLayerNoMoreSatisfied);
                     cancel();
                 }
                 if (--countdownStarter < 0) {

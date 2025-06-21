@@ -39,6 +39,9 @@ messages: # !DO NOT CHANGE PLACEHOLDERS!
   actual-coins: "&eNow you have {COINS} coins."
   kick-reason-1: "Game is still in progress"
   redirect-message: "&7You are being redirected to the Arcade Lobby!"
+  min-player-satisfied: "&7Number of minimum player satisfied!"
+  min-player-no-more-satisfied: "&7Number of minimum player no more satisfied. &4Stopped &7countdown!"
+  started-countdown: "&7Started &4countdown&7..."
   scoreboard:
     your-stats: "&e&lYour Stats:"
     ranking: "&3&lRanking:"

@@ -18,6 +18,9 @@ public class MessagesManager {
     public static String yourStats;
     public static String ranking;
     public static String redirectMessage;
+    public static String minPlayerSatisfied;
+    public static String minPLayerNoMoreSatisfied;
+    public static String startedCountdown;
 
     public static void init() {
         pluginPrefix = getOrFallback("messages.game-prefix", "&8|| &bGra&avity&7 &8| &R");
@@ -30,6 +33,9 @@ public class MessagesManager {
         yourStats = getOrFallback("messages.scoreboard.your-stats", "&e&lYour Stats:");
         ranking = getOrFallback("messages.scoreboard.ranking", "&3&lRanking:");
         redirectMessage = getOrFallback("messages.redirect-message", "&7You are being redirected to the Arcade Lobby!");
+        minPlayerSatisfied = getOrFallback("messages.min-player-satisfied","&7Number of minimum player satisfied!");
+        startedCountdown = getOrFallback("messages.started-countdown", "&7Started &4countdown&7...");
+        minPLayerNoMoreSatisfied = getOrFallback("messages.min-player-no-more-satisfied", "&7Number of minimum player no more satisfied. &4Stopped &7countdown!");
     }
 
     /* **********************************************
