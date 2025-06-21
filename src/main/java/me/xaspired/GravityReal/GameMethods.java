@@ -310,11 +310,21 @@ public class GameMethods {
                 if (--countdownStarter < 0) {
                     for (Player player : getServer().getOnlinePlayers()) {
 
-                        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                        out.writeUTF("Connect");
-                        out.writeUTF("arcade");
+                        // Check if bungeecord (server and boolean) is set in the config
+                        if (Main.getInstance().getConfig().getBoolean("bungeecord.multi-server") &&
+                                !Main.getInstance().getConfig().getString("bungeecord.send-server").isEmpty()) {
 
-                        player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
+                            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                            out.writeUTF("Connect");
+                            out.writeUTF(Main.getInstance().getConfig().getString("bungeecord.send-server"));
+
+                            player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
+                        }
+
+                        // Otherwise they will be teleported to the Lobby
+                        else {
+                            TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                        }
                     }
                     UsefulMethods.resetGame();
                     cancel();

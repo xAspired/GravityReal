@@ -39,10 +39,15 @@ messages: # !DO NOT CHANGE PLACEHOLDERS!
   winner-message: "&d{PLAYER} &efinished the game!"
   actual-coins: "&eNow you have {COINS} coins."
   kick-reason-1: "Game is still in progress"
+  redirect-message: "&7You are being redirected to the Arcade Lobby!"
   scoreboard:
     your-stats: "&e&lYour Stats:"
     ranking: "&3&lRanking:"
     waiting: "&f{NUMBER}#  Waiting..."
+
+bungeecord:
+  multi-server: true #true/false
+  send-server: "" # Server name must coincide with your server written in config.yml of your bungeecord
 
 
 max-players: 10

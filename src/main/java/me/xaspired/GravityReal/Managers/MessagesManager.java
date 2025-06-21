@@ -17,6 +17,7 @@ public class MessagesManager {
     public static String kickReason1;
     public static String yourStats;
     public static String ranking;
+    public static String redirectMessage;
 
     public static void init() {
         pluginPrefix = getOrFallback("messages.game-prefix", "&8|| &bGra&avity&7 &8| &R");
@@ -28,6 +29,7 @@ public class MessagesManager {
         kickReason1 = getOrFallback("messages.kick-reason-1", "Game is still in progress");
         yourStats = getOrFallback("messages.scoreboard.your-stats", "&e&lYour Stats:");
         ranking = getOrFallback("messages.scoreboard.ranking", "&3&lRanking:");
+        redirectMessage = getOrFallback("messages.redirect-message", "&7You are being redirected to the Arcade Lobby!");
     }
 
     /* **********************************************

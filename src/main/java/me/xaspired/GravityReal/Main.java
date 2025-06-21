@@ -196,18 +196,28 @@ public class Main extends JavaPlugin implements Listener {
                         ));
                         event.getPlayer().sendTitle(MessagesManager.greetingsPlaying, gameWinnerMessage, 10, 80, 10);
 
-                        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + "Stai per essere reindirizzato alla Lobby dell'Arcade!");
+                        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + MessagesManager.redirectMessage);
 
-                        // Teleport everyone to the arcade server
+                        // Teleport everyone when the game is finished
                         new BukkitRunnable() {
                             public void run() {
                                 for (Player player : getServer().getOnlinePlayers()) {
 
-                                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                                    out.writeUTF("Connect");
-                                    out.writeUTF("arcade");
+                                    // Check if bungeecord (server and boolean) is set in the config
+                                    if (Main.getInstance().getConfig().getBoolean("bungeecord.multi-server") &&
+                                            !Main.getInstance().getConfig().getString("bungeecord.send-server").isEmpty()) {
 
-                                    player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
+                                        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                                        out.writeUTF("Connect");
+                                        out.writeUTF(Main.getInstance().getConfig().getString("bungeecord.send-server"));
+
+                                        player.sendPluginMessage(Main.getInstance(), "BungeeCord", out.toByteArray());
+                                    }
+
+                                    // Otherwise they will be teleported to the Lobby
+                                    else {
+                                        TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                                    }
                                 }
                             }
                         }.runTaskLater(this, 100L); // 100L = 100 Tick = 5 seconds
