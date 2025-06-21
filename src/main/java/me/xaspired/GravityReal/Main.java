@@ -12,7 +12,11 @@ import me.xaspired.GravityReal.Objects.GravityPlayer;
 import me.xaspired.Shared.GravityCoinsAPI;
 import me.xaspired.Shared.GravityStatsAPI;
 import net.md_5.bungee.api.ChatMessageType;
-import org.bukkit.*;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,8 +32,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.bukkit.Bukkit.getServer;
 
 
 @SuppressWarnings("ConstantConditions")
@@ -80,8 +82,11 @@ public class Main extends JavaPlugin implements Listener {
         // Creation of Json File for Debuggin Game Status
         String fileName = "plugins/GravityReal/status.json";
 
-        //Send a message that shows that the plugin was enabled successfully
+        // Send a message that shows that the plugin was enabled successfully
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Gra" + ChatColor.GREEN + "vity" + ChatColor.GRAY + " by xAspired -  " + "Plugin Enabled Successfully!");
+
+        // Overwrite the status file
+        UsefulMethods.saveStatus(GameMethods.GameStatus.NOTYETSTARTED);
     }
 
     public static Main getInstance() {
@@ -292,7 +297,8 @@ public class Main extends JavaPlugin implements Listener {
 
         // If something went wrong for some reason
         if (placeToTeleport == null) {
-            player.spigot().sendMessage(ChatMessageType.valueOf(MessagesManager.pluginPrefix + MessagesManager.teleportingError));
+            String errorMessage = MessagesManager.pluginPrefix + MessagesManager.teleportingError;
+            player.spigot().sendMessage(ChatMessageType.SYSTEM, TextComponent.fromLegacyText(errorMessage));
             return;
         }
 

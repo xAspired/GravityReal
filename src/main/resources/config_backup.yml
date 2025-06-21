@@ -55,6 +55,7 @@ max-players: 10
 min-players: 2
 maps-per-game: 5 # Number of Maps for each game
 duration-time: 300 # Should be set in seconds
+duration-prelobby: 10 # Should be set in seconds
 lobbyspawn:
   spawnpoint:
     world: 0

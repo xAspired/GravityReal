@@ -201,7 +201,7 @@ public class GameMethods {
         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + MessagesManager.minPlayerSatisfied);
         Bukkit.broadcastMessage(MessagesManager.pluginPrefix + MessagesManager.startedCountdown);
         new BukkitRunnable() {
-            int countdownStarter = 10;
+            int countdownStarter = Main.getInstance().getConfig().getInt("duration-prelobby");
 
             public void run() {
 
