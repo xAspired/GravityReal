@@ -25,6 +25,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -67,6 +69,7 @@ public class Main extends JavaPlugin implements Listener {
 
         // Enable our class to check for new players using onPlayerJoin()
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new CompassManager(), this);
 
         // Enable the API Coins Setup
         me.xaspired.Shared.GravityCoinsAPI.setup();
@@ -117,6 +120,14 @@ public class Main extends JavaPlugin implements Listener {
 
         // Teleport player to Lobby Spawn
         TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+
+        // Clear player inventory
+        player.getInventory().clear();
+
+        // Delete every effect a player had
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
 
         // Send the custom message written in config under "message-join"
         event.getPlayer().sendMessage(MessagesManager.pluginPrefix + MessagesManager.joinMessage);
@@ -248,16 +259,26 @@ public class Main extends JavaPlugin implements Listener {
 
                     }
 
-                    // Teleport player to mainLobby after 0.5 seconds for a better optimization
+                    TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
+                    player.setInvulnerable(true);
+
+                    // This avoid TeleportManager Method overrides fly
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
+                            player.setAllowFlight(true);
+                            player.setFlying(true);
                         }
-                    }.runTaskLater(this, 1L);
+                    }.runTaskLater(Main.getInstance(), 1L);
 
-                    // Set Spectator mode to player and give him compass item
-                    player.setGameMode(GameMode.SPECTATOR);
+                    // Hide invisible player from others player
+                    for (Player others : Bukkit.getOnlinePlayers()) {
+                        if (!others.equals(player)) {
+                            others.hidePlayer(Main.getInstance(), player);
+                        }
+                    }
+
                     CompassManager.giveCompassToPlayer(player);
 
                 }

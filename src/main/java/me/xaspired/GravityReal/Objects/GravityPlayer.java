@@ -17,6 +17,7 @@ public class GravityPlayer {
         this.actualMap = actualMap;
         this.gameTime = gameTime;
         this.failsGame = failsGame;
+        this.player = player;
     }
 
     public GameMethods.PlayerStatus getStatus() {

@@ -15,7 +15,7 @@
 # Stats: MySQL, Local
 # Local is the fallback method when something doesn't work
 database:
-  storage: "mysql" #mysql, local
+  storage: "local" #mysql, local
   credentials:
     username: ''
     password: ''
@@ -24,7 +24,7 @@ database:
     dbUrl: 'localhost'
 
 coins:
-  use-playerpoints: true # If true it will override the storage and use the playerpoints API
+  use-playerpoints: false # If true it will override the storage and use the playerpoints API
   coins-per-win: 1
 
 messages: # !DO NOT CHANGE PLACEHOLDERS!
@@ -48,7 +48,7 @@ messages: # !DO NOT CHANGE PLACEHOLDERS!
     waiting: "&f{NUMBER}#  Waiting..."
 
 bungeecord:
-  multi-server: true #true/false
+  multi-server: false #true/false
   send-server: "" # Server name must coincide with your server written in config.yml of your bungeecord
 
 max-players: 10
