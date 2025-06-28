@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] [2.0.0]
+## [Unreleased] 2.0.1
+### Added
+- Compass with online players when ending
+- Spectator mode
+
+
+## [2.0.0]
 ### Added
 - Status file
 - MySQL Integration

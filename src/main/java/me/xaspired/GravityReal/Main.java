@@ -6,6 +6,7 @@ import me.xaspired.GravityReal.Commands.CommandGravity;
 import me.xaspired.GravityReal.Commands.PlayerUtilitiesCommand;
 import me.xaspired.GravityReal.Connections.DatabaseConnection;
 import me.xaspired.GravityReal.Managers.BoardManager;
+import me.xaspired.GravityReal.Managers.CompassManager;
 import me.xaspired.GravityReal.Managers.MessagesManager;
 import me.xaspired.GravityReal.Managers.TeleportManager;
 import me.xaspired.GravityReal.Objects.GravityPlayer;
@@ -13,10 +14,7 @@ import me.xaspired.Shared.GravityCoinsAPI;
 import me.xaspired.Shared.GravityStatsAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -108,7 +106,7 @@ public class Main extends JavaPlugin implements Listener {
         int maxPlayers = config.getInt("max-players");
 
         Player player = event.getPlayer();
-        GravityPlayer playerObj = new GravityPlayer(GameMethods.PlayerStatus.NONE, 0, 0, 0);
+        GravityPlayer playerObj = new GravityPlayer(GameMethods.PlayerStatus.NONE, 0, 0, 0, player);
         inGamePlayers.put(player, playerObj);
 
         // Update fileStatus with player number
@@ -164,7 +162,6 @@ public class Main extends JavaPlugin implements Listener {
             BoardManager.createBoard(event.getEntity().getPlayer());
         }
     }
-
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
@@ -259,6 +256,9 @@ public class Main extends JavaPlugin implements Listener {
                         }
                     }.runTaskLater(this, 1L);
 
+                    // Set Spectator mode to player and give him compass item
+                    player.setGameMode(GameMode.SPECTATOR);
+                    CompassManager.giveCompassToPlayer(player);
 
                 }
 
@@ -283,6 +283,7 @@ public class Main extends JavaPlugin implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();

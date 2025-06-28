@@ -1,6 +1,7 @@
 package me.xaspired.GravityReal.Objects;
 
 import me.xaspired.GravityReal.GameMethods;
+import org.bukkit.entity.Player;
 
 public class GravityPlayer {
 
@@ -8,9 +9,10 @@ public class GravityPlayer {
     private int actualMap;
     private int gameTime;
     private int failsGame;
+    private Player player;
 
     // Constructor
-    public GravityPlayer(GameMethods.PlayerStatus status, int actualMap, int gameTime, int failsGame) {
+    public GravityPlayer(GameMethods.PlayerStatus status, int actualMap, int gameTime, int failsGame, Player player) {
         this.status = status;
         this.actualMap = actualMap;
         this.gameTime = gameTime;
@@ -32,6 +34,8 @@ public class GravityPlayer {
     public int getGameTime() {
         return gameTime;
     }
+
+    public Player getPlayer() { return player; }
 
     public void setStatus(GameMethods.PlayerStatus status) {
         this.status = status;
