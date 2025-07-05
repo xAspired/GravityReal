@@ -21,6 +21,16 @@ public class MessagesManager {
     public static String minPlayerSatisfied;
     public static String minPLayerNoMoreSatisfied;
     public static String startedCountdown;
+    public static String youFinished;
+    public static String spectatorMode;
+    public static String compassName;
+    public static String compassDisplayname;
+    public static String compassLoreRow1;
+    public static String compassLoreRow2;
+    public static String compassLoreRow3;
+    public static String clickToTeleport;
+    public static String playerNotOnline;
+
 
     public static void init() {
         pluginPrefix = getOrFallback("messages.game-prefix", "&8|| &bGra&avity&7 &8| &R");
@@ -36,6 +46,15 @@ public class MessagesManager {
         minPlayerSatisfied = getOrFallback("messages.min-player-satisfied","&7Number of minimum player satisfied!");
         startedCountdown = getOrFallback("messages.started-countdown", "&7Started &4countdown&7...");
         minPLayerNoMoreSatisfied = getOrFallback("messages.min-player-no-more-satisfied", "&7Number of minimum player no more satisfied. &4Stopped &7countdown!");
+        youFinished = getOrFallback("messages.you-finished", "&7You've finished!");
+        spectatorMode = getOrFallback("messages.spectator-mode", "&cYou are now in spectator mode");
+        compassName = getOrFallback("message.compass-name", "&bIn game players");
+        compassDisplayname = getOrFallback("message.compass-displayname", "&aIn game Players");
+        compassLoreRow1 = getOrFallback("message.compass-lore-row1", "");
+        compassLoreRow2 = getOrFallback("message.compass-lore-row2", "&7What do you think about stalking");
+        compassLoreRow3 = getOrFallback("message.compass-lore-row3", "&7who is still in game?");
+        clickToTeleport = getOrFallback("message.click-to-teleport", "&7Click to teleport");
+        playerNotOnline = getOrFallback("message.player-not-online", "&cThe player is not online anymore.");
     }
 
     /* **********************************************

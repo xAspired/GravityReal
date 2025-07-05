@@ -14,7 +14,10 @@ import me.xaspired.Shared.GravityCoinsAPI;
 import me.xaspired.Shared.GravityStatsAPI;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -121,20 +124,17 @@ public class Main extends JavaPlugin implements Listener {
         // Teleport player to Lobby Spawn
         TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
 
-        // Clear player inventory
-        player.getInventory().clear();
-
-        // Delete every effect a player had
-        for (PotionEffect effect : player.getActivePotionEffects()) {
-            player.removePotionEffect(effect.getType());
-        }
-
         // Send the custom message written in config under "message-join"
         event.getPlayer().sendMessage(MessagesManager.pluginPrefix + MessagesManager.joinMessage);
         event.getPlayer().sendTitle(MessagesManager.welcomeTitle, MessagesManager.queueTitle, 10, 80, 10);
 
+        // Joined Lobby Message taken from config
+        String joinedLobbyMessage = MessagesManager.getFormatted("messages.joined-lobby", Map.of(
+                "PLAYER", event.getPlayer().getName()
+        ));
+
         // Send the join message
-        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.LIGHT_PURPLE + event.getPlayer().getName() + ChatColor.YELLOW + " è entrato nella lobby " + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
+        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + joinedLobbyMessage + ChatColor.RED + "(" + Bukkit.getOnlinePlayers().size() + "/" + maxPlayers + ")");
 
         // If the min of players is the one inserted in the config
         if (UsefulMethods.areMinPlayersOnline() && (GameMethods.status == GameMethods.GameStatus.NOTYETSTARTED)) {
@@ -152,6 +152,17 @@ public class Main extends JavaPlugin implements Listener {
 
         // Update fileStatus with player number
         UsefulMethods.saveStatus(GameMethods.status);
+
+        // Remove invulnerability of player
+        event.getPlayer().setInvulnerable(false);
+
+        // Clear player inventory
+        event.getPlayer().getInventory().clear();
+
+        // Delete every effect a player had
+        for (PotionEffect effect : event.getPlayer().getActivePotionEffects()) {
+            event.getPlayer().removePotionEffect(effect.getType());
+        }
 
         //If there is no one on the Server, Game will be reset
         if (Bukkit.getOnlinePlayers().size() <= 1)
@@ -209,7 +220,10 @@ public class Main extends JavaPlugin implements Listener {
                         ));
                         event.getPlayer().sendTitle(MessagesManager.greetingsPlaying, gameWinnerMessage, 10, 80, 10);
 
-                        Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + MessagesManager.redirectMessage);
+                        if (Main.getInstance().getConfig().getBoolean("bungeecord.multi-server") &&
+                                !Main.getInstance().getConfig().getString("bungeecord.send-server").isEmpty()) {
+                            Bukkit.broadcastMessage(MessagesManager.pluginPrefix + ChatColor.GRAY + MessagesManager.redirectMessage);
+                        }
 
                         // Teleport everyone when the game is finished
                         new BukkitRunnable() {
@@ -259,7 +273,6 @@ public class Main extends JavaPlugin implements Listener {
 
                     }
 
-                    TeleportManager.teleportPlayer(player, TeleportManager.getLobbySpawn());
                     player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false));
                     player.setInvulnerable(true);
 
@@ -278,6 +291,8 @@ public class Main extends JavaPlugin implements Listener {
                             others.hidePlayer(Main.getInstance(), player);
                         }
                     }
+
+                    event.getPlayer().sendTitle(MessagesManager.youFinished, MessagesManager.spectatorMode, 10, 80, 10);
 
                     CompassManager.giveCompassToPlayer(player);
 

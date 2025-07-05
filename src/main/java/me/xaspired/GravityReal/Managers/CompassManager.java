@@ -23,15 +23,15 @@ import java.util.List;
 import java.util.Objects;
 
 public class CompassManager implements Listener {
-    private final Inventory inv = Bukkit.createInventory(null, 27, "§bGiocatori in Gioco");
+    private final Inventory inv = Bukkit.createInventory(null, 27, MessagesManager.compassName);
 
     public static void giveCompassToPlayer(Player player) {
         ItemStack compassPlayer = createGuiItem(
-                "",
-                "§8| §7Che ne dici di spiare un po'",
-                "§8| §7chi sta ancora giocando?"
+                MessagesManager.compassLoreRow1,
+                MessagesManager.compassLoreRow2,
+                MessagesManager.compassLoreRow3
         );
-        player.getInventory().setItem(0, compassPlayer);
+        player.getInventory().setItem(4, compassPlayer);
     }
 
     /* **********************************************
@@ -42,7 +42,7 @@ public class CompassManager implements Listener {
         final ItemMeta meta = item.getItemMeta();
 
         assert meta != null;
-        meta.setDisplayName("§aGiocatori in Gioco");
+        meta.setDisplayName(MessagesManager.compassDisplayname);
         meta.setLore(Arrays.asList(lore));
         item.setItemMeta(meta);
 
@@ -65,7 +65,7 @@ public class CompassManager implements Listener {
             assert meta != null;
             meta.setOwningPlayer(playerInGameOnline.getPlayer());
             meta.setDisplayName("§a" + playerInGameOnline.getPlayer().getName());
-            meta.setLore(List.of("§7Clicca per teletrasportarti"));
+            meta.setLore(List.of(MessagesManager.clickToTeleport));
             skull.setItemMeta(meta);
             inv.addItem(skull);
         }
@@ -82,7 +82,7 @@ public class CompassManager implements Listener {
 
         if (item != null && item.getType() == Material.COMPASS && item.hasItemMeta()) {
             String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
-            if (displayName.equalsIgnoreCase("§aGiocatori in Gioco")) {
+            if (displayName.equalsIgnoreCase(MessagesManager.compassDisplayname)) {
                 updateInventoryWithPlayerHeads(e.getPlayer());
                 openInventory(player);
                 e.setCancelled(true);
@@ -92,7 +92,7 @@ public class CompassManager implements Listener {
 
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
-        if (!e.getView().getTitle().equals("§bGiocatori in Gioco")) return;
+        if (!e.getView().getTitle().equals(MessagesManager.compassName)) return;
 
         e.setCancelled(true);
 
@@ -104,7 +104,7 @@ public class CompassManager implements Listener {
         if (!(clickedItem.getItemMeta() instanceof SkullMeta skullMeta)) return;
         OfflinePlayer targetOffline = skullMeta.getOwningPlayer();
         if (targetOffline == null || !targetOffline.isOnline()) {
-            clicker.sendMessage("§cIl giocatore non è più online.");
+            clicker.sendMessage(MessagesManager.playerNotOnline);
             return;
         }
 
@@ -127,7 +127,7 @@ public class CompassManager implements Listener {
 
     @EventHandler
     public void onInventoryDrag(final InventoryDragEvent e) {
-        if (e.getView().getTitle().equals("§bGiocatori in Gioco")) {
+        if (e.getView().getTitle().equals(MessagesManager.compassName)) {
             e.setCancelled(true);
         }
     }
